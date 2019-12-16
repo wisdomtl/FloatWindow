@@ -174,7 +174,7 @@ object FloatWindow : View.OnTouchListener {
         }
 
         //let GestureDetector take care of touch event,in order to parsing touch event into different gesture
-        gestureDetector.onTouchEvent(event).takeIf { !it }?.also {
+        gestureDetector.onTouchEvent(event).takeIf { !it && dragEnable }?.also {
             //there is no ACTION_UP event in GestureDetector
             val action = event.action
             when (action) {

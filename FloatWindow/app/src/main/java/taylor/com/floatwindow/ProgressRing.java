@@ -87,7 +87,6 @@ public class ProgressRing extends androidx.appcompat.widget.AppCompatImageView {
     }
 
     public void setTextSize(float textSize) {
-        Log.v("ttaylor", "ProgressRing.setTextSize()" + " textSize= " + textSize);
         this.textSize = textSize;
         invalidate();
     }

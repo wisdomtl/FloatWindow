@@ -64,7 +64,6 @@ class MainActivity : AppCompatActivity() {
         progressRing!!.setImageDrawable(animationDrawable)
         timer = Timer(Timer.TimerListener { pastMillisecond ->
             val mod = pastMillisecond % FULL_TIME_MILLISECOND
-            Log.v("ttaylor", "CustomViewActivity.onTick() mod=$mod,past=$pastMillisecond")
             val progress = getProgress(mod, FULL_TIME_MILLISECOND)
             progressRing!!.setProgress(progress)
             if (mod == 0f) {
