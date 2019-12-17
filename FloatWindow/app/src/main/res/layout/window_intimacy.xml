@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+
+    <!--    <include-->
+    <!--        layout="@layout/chat_intimacy_head"/>-->
+
+    <!--    <androidx.constraintlayout.helper.widget.Layer-->
+    <!--        android:id="@+id/layer"-->
+    <!--        android:layout_width="@dimen/intimacy_head_width"-->
+    <!--        android:layout_height="60dp"-->
+    <!--        android:background="@drawable/intimacy_head_background"-->
+    <!--        app:constraint_referenced_ids="ivIntimacy"-->
+    <!--        android:paddingStart="4dp"-->
+    <!--        app:layout_constraintTop_toTopOf="@id/ivIntimacy"-->
+    <!--        app:layout_constraintBottom_toBottomOf="@id/ivIntimacy"-->
+    <!--        app:layout_constraintStart_toStartOf="@id/ivIntimacy"/>-->
+
+    <View
+        android:id="@+id/vIntimacy"
+        android:layout_width="100dp"
+        android:layout_height="45dp"
+        android:background="@drawable/intimacy_head_background"
+        app:layout_constraintBottom_toBottomOf="@id/ivIntimacy"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ivIntimacy" />
+
+    <ImageView
+        android:id="@+id/ivIntimacy"
+        android:layout_width="37dp"
+        android:layout_height="37dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="50dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/intimacy_heart"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_goneMarginStart="3dp" />
+
+    <TextView
+        android:id="@+id/tvIntimacyValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:includeFontPadding="false"
+        android:text="200"
+        android:textColor="#ff747e8b"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@id/tvIntimacy"
+        app:layout_constraintStart_toEndOf="@id/ivIntimacy"
+        app:layout_constraintTop_toTopOf="@id/ivIntimacy" />
+
+    <TextView
+        android:id="@+id/tvIntimacy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="value"
+        android:textColor="#B3747e8b"
+        android:textSize="9sp"
+        app:layout_constraintBottom_toBottomOf="@id/ivIntimacy"
+        app:layout_constraintStart_toStartOf="@id/tvIntimacyValue"
+        app:layout_constraintTop_toBottomOf="@id/tvIntimacyValue" />
+
+    <LinearLayout
+        android:id="@+id/llContainer"
+        android:layout_width="80dp"
+        android:orientation="vertical"
+        app:layout_constraintStart_toEndOf="@id/vIntimacy"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="invisible"
+        android:background="#ffffff"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="colum1"
+            android:textSize="20sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:text="colum2"
+            android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:text="colum3"
+            android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:text="colum4"
+            android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:text="colum5"
+            android:textSize="20sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+
+    <!--    <TextView-->
+    <!--        android:id="@+id/tv_window"-->
+    <!--        android:layout_width="45dp"-->
+    <!--        android:layout_height="45dp"-->
+    <!--        android:background="#00ff00"-->
+    <!--        android:text="asdf"-->
+    <!--        android:textSize="30sp" />-->
+
+    <!--    <TextView-->
+    <!--        android:id="@+id/tv_window_right"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:background="#ffff00"-->
+    <!--        android:text="zxcvo"-->
+    <!--        android:textSize="40sp" />-->
+
+    <!--    <androidx.recyclerview.widget.RecyclerView-->
+    <!--        android:id="@+id/rvMilestone"-->
+    <!--        android:layout_width="180dp"-->
+    <!--        app:layout_constraintStart_toEndOf=""-->
+    <!--        android:layout_height="wrap_content"/>-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

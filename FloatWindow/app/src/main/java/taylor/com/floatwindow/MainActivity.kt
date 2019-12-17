@@ -1,7 +1,9 @@
 package taylor.com.floatwindow
 
+import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
@@ -10,55 +12,165 @@ import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuItem
+import android.view.LayoutInflater
 import android.view.View
+import android.view.WindowManager
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AccelerateInterpolator
-
-import kotlinx.android.synthetic.main.activity_main.*
+import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
+import taylor.com.floatwindow.FloatWindow.WindowClickListener
 
 class MainActivity : AppCompatActivity() {
 
-    private var progressRing:ProgressRing?=null
+    private var progressRing: ProgressRing? = null
     private val FULL_TIME_MILLISECOND = 6 * 1000.toFloat()
-    private var timer:Timer?=null
+    private var timer: Timer? = null
     private val d1 = 400
     private val d2 = 400
     val VALUE_ANIM_DURATION = 800
     val TAG_WINDOW_A = "A"
     val BOMB_ANIM_DURATION_IN_MILLISECOND = 6 * 100
     private var animationDrawable: AnimationDrawable? = null
-    private var windowInfo:FloatWindow.WindowInfo?=null
+    private var windowInfo: FloatWindow.WindowInfo? = null
+    private var intimacyWindowInfo: FloatWindow.WindowInfo? = null
+    private var intimacyTranslationX: Int? = null
+    private var intimacyAnimator:ValueAnimator? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-
     }
 
     override fun onResume() {
         super.onResume()
+        showDragableWindow()
+
+//        showSideWindow()
+    }
+
+    private fun showDragableWindow() {
         if (windowInfo == null) {
             windowInfo = FloatWindow.WindowInfo(generateWindowView())
             windowInfo!!.width = DimensionUtil.dp2px(54.0)
             windowInfo!!.height = DimensionUtil.dp2px(54.0)
-            FloatWindow.show(this, TAG_WINDOW_A, windowInfo, 0, 0,true)
+            FloatWindow.show(this, TAG_WINDOW_A, windowInfo, 0, 0, true)
         }
-        FloatWindow.show(this, TAG_WINDOW_A,dragEnable = true)
-        FloatWindow.setOutsideTouchable(true,{
-            Log.v("ttaylor","tag=touch outside, WindowActivity.onResume()  ")
+        FloatWindow.show(this, TAG_WINDOW_A, dragEnable = true)
+        FloatWindow.setOutsideTouchable(true, {
+            Log.v("ttaylor", "tag=touch outside, WindowActivity.onResume()  ")
         })
     }
 
-    private fun generateWindowView(): View { //        TextView tv = new TextView(this);
-//        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//        tv.setLayoutParams(layoutParams);
-//        tv.setText("window view");
-//        tv.setTextSize(40);
-//        return tv;
+
+    private fun showSideWindow() {
+        val view = LayoutInflater.from(this).inflate(R.layout.window_intimacy, null)
+        if (intimacyWindowInfo == null) {
+            intimacyWindowInfo = FloatWindow.WindowInfo(view)
+            intimacyWindowInfo!!.width = DimensionUtil.dp2px(180.0)
+            intimacyWindowInfo!!.height = WindowManager.LayoutParams.WRAP_CONTENT
+        }
+        val x: Int = DimensionUtil.getScreenWidth(this) - DimensionUtil.dp2px(100.0)
+        val y: Int = DimensionUtil.dp2px(75.0)
+        FloatWindow.show(this, "intimacy", intimacyWindowInfo, x, y, true)
+        view.post {
+            val lin: LinearLayout = view.findViewById(R.id.llContainer)
+                ?: return@post
+            val location = IntArray(2)
+            lin.getLocationOnScreen(location)
+            intimacyTranslationX =
+                DimensionUtil.dp2px(80.0) - (DimensionUtil.getScreenWidth(this@MainActivity) - location[0])
+        }
+        FloatWindow.setClickListener(R.id.vIntimacy, object : WindowClickListener {
+            override fun onWindowClick(windowInfo: FloatWindow.WindowInfo?): Boolean {
+                windowInfo?.let { onIntimacyClick(it,x) }
+                return true
+            }
+        })
+    }
+
+    private fun onIntimacyClick(windowInfo: FloatWindow.WindowInfo, initX: Int): Boolean? {
+        if (windowInfo.layoutParams == null) {
+            return false
+        }
+        var end = 0
+        end = if (windowInfo.layoutParams!!.x === initX) {
+            windowInfo.layoutParams!!.x - (intimacyTranslationX ?: 0)
+        } else {
+            windowInfo.layoutParams!!.x + (intimacyTranslationX ?: 0)
+        }
+        val start: Int = windowInfo.layoutParams!!.x
+        animateIntimacy(windowInfo, start, end)
+        return true
+    }
+
+    private fun animateIntimacy(windowInfo: FloatWindow.WindowInfo, start: Int, end: Int) {
+        if (intimacyAnimator != null && intimacyAnimator!!.isRunning) {
+            return
+        }
+        if (intimacyAnimator == null) {
+            intimacyAnimator = ValueAnimator.ofInt(start, end)
+            intimacyAnimator!!.addListener(intimacyAnimListener)
+            intimacyAnimator!!.setInterpolator(AccelerateDecelerateInterpolator())
+            intimacyAnimator!!.setDuration(200)
+            intimacyAnimator!!.addUpdateListener(AnimatorUpdateListener { animation: ValueAnimator ->
+                val x1 = animation.animatedValue as Int
+                if (windowInfo.layoutParams != null) {
+                    windowInfo.layoutParams!!.x = x1
+                }
+                val windowManager =
+                    getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                if (windowInfo.hasParent()) {
+                    windowManager.updateViewLayout(
+                        windowInfo.view,
+                        windowInfo.layoutParams
+                    )
+                }
+            })
+        } else {
+            intimacyAnimator!!.setIntValues(start, end)
+        }
+        intimacyAnimator!!.start()
+    }
+
+    private val intimacyAnimListener: Animator.AnimatorListener =
+        object : Animator.AnimatorListener {
+            private var lin: LinearLayout? = null
+            private var startVisibility = View.INVISIBLE
+            override fun onAnimationStart(animation: Animator) {
+                showMilestone()
+            }
+
+            override fun onAnimationEnd(animation: Animator) {
+                hideMilestone()
+            }
+
+            override fun onAnimationCancel(animation: Animator) {}
+            override fun onAnimationRepeat(animation: Animator) {}
+            private fun showMilestone() {
+                val windowInfo1: FloatWindow.WindowInfo = FloatWindow.windowInfo ?: return
+                val intimacyView: View = windowInfo1.view ?: return
+                lin = intimacyView.findViewById(R.id.llContainer)
+                if (lin == null) {
+                    return
+                }
+                startVisibility = lin!!.visibility
+                if (startVisibility != View.VISIBLE) {
+                    lin!!.visibility = View.VISIBLE
+                }
+            }
+
+            private fun hideMilestone() {
+                if (lin == null) {
+                    return
+                }
+                if (startVisibility == View.VISIBLE) {
+                    lin!!.visibility = View.GONE
+                }
+            }
+        }
+
+    private fun generateWindowView(): View {
         progressRing = ProgressRing(this)
         animationDrawable = createAnimationDrawable(this)
         progressRing!!.setImageDrawable(animationDrawable)
@@ -75,7 +187,12 @@ class MainActivity : AppCompatActivity() {
         return progressRing!!
     }
 
-    fun decodeSampledBitmapFromResource(res: Resources?, resId: Int, reqWidth: Int, reqHeight: Int): Bitmap {
+    fun decodeSampledBitmapFromResource(
+        res: Resources?,
+        resId: Int,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Bitmap {
         val options = BitmapFactory.Options()
         options.inJustDecodeBounds = true
         BitmapFactory.decodeResource(res, resId, options)
@@ -86,7 +203,11 @@ class MainActivity : AppCompatActivity() {
         return BitmapFactory.decodeResource(res, resId, options)
     }
 
-    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int { // 源图片的高度和宽度
+    private fun calculateInSampleSize(
+        options: BitmapFactory.Options,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Int { // 源图片的高度和宽度
         val height = options.outHeight
         val width = options.outWidth
         var inSampleSize = 1
@@ -105,28 +226,226 @@ class MainActivity : AppCompatActivity() {
     private fun createAnimationDrawable(context: Context): AnimationDrawable {
         val drawable = AnimationDrawable()
         val frameDuration = BOMB_ANIM_DURATION_IN_MILLISECOND / 21
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_1, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_2, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_3, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_4, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_5, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_6, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_7, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_8, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_9, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_10, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_11, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_12, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_13, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_14, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_15, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_16, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_17, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_18, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_19, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_20, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_21, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
-        drawable.addFrame(BitmapDrawable(decodeSampledBitmapFromResource(context.resources, R.drawable.watch_reward_22, DimensionUtil.dp2px(54.0), DimensionUtil.dp2px(54.0))), frameDuration)
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_1,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_2,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_3,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_4,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_5,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_6,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_7,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_8,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_9,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_10,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_11,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_12,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_13,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_14,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_15,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_16,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_17,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_18,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_19,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_20,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_21,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
+        drawable.addFrame(
+            BitmapDrawable(
+                decodeSampledBitmapFromResource(
+                    context.resources,
+                    R.drawable.watch_reward_22,
+                    DimensionUtil.dp2px(54.0),
+                    DimensionUtil.dp2px(54.0)
+                )
+            ), frameDuration
+        )
         drawable.isOneShot = true
         return drawable
     }

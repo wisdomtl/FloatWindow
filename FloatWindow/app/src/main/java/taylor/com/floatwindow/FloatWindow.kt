@@ -3,11 +3,12 @@ package taylor.com.floatwindow
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
 import android.view.animation.LinearInterpolator
-import java.util.*
+
 
 /**
  * a window shows above an activity.
@@ -19,7 +20,7 @@ object FloatWindow : View.OnTouchListener {
      * several window content stored by String tag ;
      */
     private var windowInfoMap: HashMap<String, WindowInfo?> = HashMap()
-    private var windowInfo: WindowInfo? = null
+    var windowInfo: WindowInfo? = null
     private var lastTouchX: Int = 0
     private var lastTouchY: Int = 0
     private val lastWeltX: Int = 0
@@ -27,7 +28,7 @@ object FloatWindow : View.OnTouchListener {
     private var screenHeight: Int = 0
     private var context: Context? = null
     private var gestureDetector: GestureDetector = GestureDetector(context, GestureListener())
-    private var clickListener: WindowClickListener? = null
+    private var clickListenerMap: MutableMap<Int, WindowClickListener>? = null
     private var windowStateListener: WindowStateListener? = null
     private var dragEnable: Boolean = false
     /**
@@ -75,8 +76,12 @@ object FloatWindow : View.OnTouchListener {
         }
     }
 
-    fun setClickListener(listener: WindowClickListener) {
-        clickListener = listener
+    fun setClickListener(
+        id: Int,
+        listener: WindowClickListener
+    ) {
+        if (clickListenerMap == null) clickListenerMap = mutableMapOf()
+        clickListenerMap!![id] = listener
     }
 
     fun setEnable(enable: Boolean, tag: String) {
@@ -102,7 +107,7 @@ object FloatWindow : View.OnTouchListener {
         windowInfo: WindowInfo? = windowInfoMap[tag],
         x: Int = windowInfo?.layoutParams?.x.value(),
         y: Int = windowInfo?.layoutParams?.y.value(),
-        dragEnable: Boolean
+        dragEnable: Boolean = false
     ) {
         if (windowInfo == null) {
             Log.v("ttaylor", "there is no view to show,please creating the right WindowInfo object")
@@ -165,9 +170,6 @@ object FloatWindow : View.OnTouchListener {
 
     override fun onTouch(v: View, event: MotionEvent): Boolean {
         //handle outside touch event
-        val x = event.x.toInt()
-        val y = event.y.toInt()
-
         if (event.action == MotionEvent.ACTION_OUTSIDE) {
             onTouchOutside?.invoke()
             return true
@@ -185,9 +187,6 @@ object FloatWindow : View.OnTouchListener {
         }
         return true
     }
-
-    private fun isTouchOutside(x: Int, y: Int) =
-        x < 0 || x >= windowInfo?.view?.width ?: Int.MAX_VALUE || y < 0 || y >= windowInfo?.view?.height ?: Int.MAX_VALUE
 
     /**
      * set whether outside touch event could be detected
@@ -333,6 +332,8 @@ object FloatWindow : View.OnTouchListener {
 
     private class GestureListener : GestureDetector.OnGestureListener {
 
+        private var touchFrame: Rect? = null
+
         override fun onDown(e: MotionEvent): Boolean {
             onActionDown(e)
             return false
@@ -341,7 +342,7 @@ object FloatWindow : View.OnTouchListener {
         override fun onShowPress(e: MotionEvent) {}
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            return clickListener?.onWindowClick(windowInfo) ?: false
+            return clickChild(e.x.toInt(), e.y.toInt())
         }
 
         override fun onScroll(
@@ -368,11 +369,42 @@ object FloatWindow : View.OnTouchListener {
             return false
         }
 
+
+        /**
+         * find clickable child according to the touch position
+         */
+        fun clickChild(x: Int, y: Int): Boolean {
+            if (touchFrame == null) {
+                touchFrame = Rect()
+            }
+
+            windowInfo?.view?.takeIf { it is ViewGroup }?.let { rootView ->
+                rootView as ViewGroup
+                (0 until rootView.childCount).map { index -> rootView.getChildAt(index) }
+                    .forEach { child ->
+                        if (child.visibility == View.VISIBLE) {
+                            child.getHitRect(touchFrame)
+                            if (touchFrame?.contains(x, y).value()
+                                && clickListenerMap?.get(child.id) != null
+                            ) {
+                                return clickListenerMap?.get(child.id)?.onWindowClick(windowInfo)
+                                    .value()
+                            }
+                        }
+                    }
+            }
+            return false
+        }
+
     }
 
     fun onDestroy() {
         windowInfoMap.clear()
         context = null
+    }
+
+    fun release(){
+        clickListenerMap?.clear()
     }
 
     class WindowInfo(var view: View?) {
