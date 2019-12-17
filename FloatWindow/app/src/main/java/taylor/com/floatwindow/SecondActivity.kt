@@ -59,8 +59,10 @@ class SecondActivity: AppCompatActivity() {
         }
         var end = 0
         end = if (windowInfo.layoutParams!!.x === initX) {
+            FloatWindow.setDimAmount(0.3f)
             windowInfo.layoutParams!!.x - (intimacyTranslationX ?: 0)
         } else {
+            FloatWindow.setDimAmount(0.0f)
             windowInfo.layoutParams!!.x + (intimacyTranslationX ?: 0)
         }
         val start: Int = windowInfo.layoutParams!!.x
@@ -75,9 +77,9 @@ class SecondActivity: AppCompatActivity() {
         if (intimacyAnimator == null) {
             intimacyAnimator = ValueAnimator.ofInt(start, end)
             intimacyAnimator!!.addListener(intimacyAnimListener)
-            intimacyAnimator!!.setInterpolator(AccelerateDecelerateInterpolator())
-            intimacyAnimator!!.setDuration(200)
-            intimacyAnimator!!.addUpdateListener({ animation: ValueAnimator ->
+            intimacyAnimator!!.interpolator = AccelerateDecelerateInterpolator()
+            intimacyAnimator!!.duration = 200
+            intimacyAnimator!!.addUpdateListener { animation: ValueAnimator ->
                 val x1 = animation.animatedValue as Int
                 if (windowInfo.layoutParams != null) {
                     windowInfo.layoutParams!!.x = x1
@@ -90,7 +92,7 @@ class SecondActivity: AppCompatActivity() {
                         windowInfo.layoutParams
                     )
                 }
-            })
+            }
         } else {
             intimacyAnimator!!.setIntValues(start, end)
         }

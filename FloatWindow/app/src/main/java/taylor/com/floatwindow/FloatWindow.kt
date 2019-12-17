@@ -144,12 +144,19 @@ object FloatWindow : View.OnTouchListener {
             type = WindowManager.LayoutParams.TYPE_APPLICATION
             format = PixelFormat.TRANSLUCENT
             flags =
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_DIM_BEHIND
+            dimAmount = 0f
             gravity = Gravity.START or Gravity.TOP
             width = windowInfo?.width.value()
             height = windowInfo?.height.value()
             this.x = x
             this.y = y
+        }
+    }
+
+    fun setDimAmount(amount:Float){
+        windowInfo?.layoutParams?.let {
+            it.dimAmount = amount
         }
     }
 
@@ -403,7 +410,7 @@ object FloatWindow : View.OnTouchListener {
         context = null
     }
 
-    fun release(){
+    fun release() {
         clickListenerMap?.clear()
     }
 

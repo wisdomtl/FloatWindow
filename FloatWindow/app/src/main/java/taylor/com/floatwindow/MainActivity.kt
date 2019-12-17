@@ -1,9 +1,7 @@
 package taylor.com.floatwindow
 
-import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
-import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
@@ -13,16 +11,11 @@ import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.WindowManager
-import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.*
+import android.view.accessibility.AccessibilityEvent
 import android.view.animation.AccelerateInterpolator
 import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import taylor.com.floatwindow.FloatWindow.WindowClickListener
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,6 +31,114 @@ class MainActivity : AppCompatActivity() {
     private var windowInfo: FloatWindow.WindowInfo? = null
 
 
+    val callback = object: Window.Callback{
+        override fun onActionModeFinished(mode: ActionMode?) {
+        }
+
+        override fun onCreatePanelView(featureId: Int): View? {
+            return null
+        }
+
+        override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
+            window.superDispatchTouchEvent(event)
+            Log.v("ttaylor","tag=, MainActivity.dispatchTouchEvent()  event=${event?.action}")
+            return false
+        }
+
+        override fun onCreatePanelMenu(featureId: Int, menu: Menu): Boolean {
+            return false
+        }
+
+        override fun onWindowStartingActionMode(callback: ActionMode.Callback?): ActionMode? {
+            return null
+        }
+
+        override fun onWindowStartingActionMode(
+            callback: ActionMode.Callback?,
+            type: Int
+        ): ActionMode? {
+            return null
+        }
+
+        override fun onAttachedToWindow() {
+
+        }
+
+        override fun dispatchGenericMotionEvent(event: MotionEvent?): Boolean {
+            return false
+        }
+
+        override fun dispatchPopulateAccessibilityEvent(event: AccessibilityEvent?): Boolean {
+            return false
+        }
+
+        override fun dispatchTrackballEvent(event: MotionEvent?): Boolean {
+            return false
+        }
+
+        override fun dispatchKeyShortcutEvent(event: KeyEvent?): Boolean {
+            return false
+        }
+
+        override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
+            return false
+        }
+
+        override fun onMenuOpened(featureId: Int, menu: Menu): Boolean {
+            return false
+        }
+
+        override fun onPanelClosed(featureId: Int, menu: Menu) {
+
+        }
+
+        override fun onMenuItemSelected(featureId: Int, item: MenuItem): Boolean {
+            return false
+        }
+
+        override fun onDetachedFromWindow() {
+        }
+
+        override fun onPreparePanel(featureId: Int, view: View?, menu: Menu): Boolean {
+            return false
+        }
+
+        override fun onWindowAttributesChanged(attrs: WindowManager.LayoutParams?) {
+        }
+
+        override fun onWindowFocusChanged(hasFocus: Boolean) {
+        }
+
+        override fun onContentChanged() {
+        }
+
+        override fun onSearchRequested(): Boolean {
+            return false
+        }
+
+        override fun onSearchRequested(searchEvent: SearchEvent?): Boolean {
+            return false
+        }
+
+        override fun onActionModeStarted(mode: ActionMode?) {
+        }
+
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        printCallStack()
+        return super.dispatchTouchEvent(ev)
+    }
+
+
+    fun printCallStack(){
+        val ex = Throwable()
+        ex.stackTrace?.take(8)?.forEach {
+            Log.v("ttaylor","tag=asdf, .printCallStack()  ${it.className}.${it.methodName} line number=${it.lineNumber}")
+        }
+        Log.e("ttaylor","tag=asdf, .printCallStack() --------------------------------------------")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -47,6 +148,8 @@ class MainActivity : AppCompatActivity() {
                 startActivity(it)
             }
         }
+
+//        window.callback = callback
     }
 
     override fun onResume() {
