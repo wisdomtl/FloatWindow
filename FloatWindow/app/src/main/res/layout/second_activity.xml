@@ -14,19 +14,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:text="dragable Window"
+        android:text="side Window"
         android:textSize="40sp"
         android:layout_height="wrap_content"/>
 
-    <Button
-        android:id="@+id/tvD"
-        android:text="side window"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:textSize="40sp"
-        app:layout_constraintTop_toBottomOf="@id/tvtitle"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
