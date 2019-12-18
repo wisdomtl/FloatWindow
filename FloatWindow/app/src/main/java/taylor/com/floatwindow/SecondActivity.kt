@@ -11,11 +11,11 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 
-class SecondActivity: AppCompatActivity() {
+class SecondActivity : AppCompatActivity() {
 
     private var intimacyWindowInfo: FloatWindow.WindowInfo? = null
     private var intimacyTranslationX: Int? = null
-    private var intimacyAnimator:ValueAnimator? = null
+    private var intimacyAnimator: ValueAnimator? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,16 +45,19 @@ class SecondActivity: AppCompatActivity() {
             intimacyTranslationX =
                 DimensionUtil.dp2px(80.0) - (DimensionUtil.getScreenWidth(this@SecondActivity) - location[0])
         }
-        FloatWindow.setClickListener(R.id.vIntimacy, object : FloatWindow.WindowClickListener {
-            override fun onWindowClick(windowInfo: FloatWindow.WindowInfo?): Boolean {
-                windowInfo?.let { onIntimacyClick(it,x) }
+        FloatWindow.setClickListener(object : FloatWindow.WindowClickListener {
+            override fun onWindowClick(view: View, windowInfo: FloatWindow.WindowInfo?): Boolean {
+                when (view.id) {
+                    R.id.vIntimacy -> onIntimacyClick(windowInfo, x)
+                    else -> { }
+                }
                 return true
             }
         })
     }
 
-    private fun onIntimacyClick(windowInfo: FloatWindow.WindowInfo, initX: Int): Boolean? {
-        if (windowInfo.layoutParams == null) {
+    private fun onIntimacyClick(windowInfo: FloatWindow.WindowInfo?, initX: Int): Boolean? {
+        if (windowInfo?.layoutParams == null) {
             return false
         }
         var end = 0

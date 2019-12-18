@@ -28,8 +28,8 @@ object FloatWindow : View.OnTouchListener {
     private var screenHeight: Int = 0
     private var context: Context? = null
     private var gestureDetector: GestureDetector = GestureDetector(context, GestureListener())
-    private var clickListenerMap: MutableMap<Int, WindowClickListener>? = null
     private var windowStateListener: WindowStateListener? = null
+    private var clickListener: WindowClickListener? = null
     private var dragEnable: Boolean = false
     /**
      * this list records the activities which shows this window
@@ -76,12 +76,8 @@ object FloatWindow : View.OnTouchListener {
         }
     }
 
-    fun setClickListener(
-        id: Int,
-        listener: WindowClickListener
-    ) {
-        if (clickListenerMap == null) clickListenerMap = mutableMapOf()
-        clickListenerMap!![id] = listener
+    fun setClickListener(listener: WindowClickListener) {
+        this.clickListener = listener
     }
 
     fun setEnable(enable: Boolean, tag: String) {
@@ -154,7 +150,7 @@ object FloatWindow : View.OnTouchListener {
         }
     }
 
-    fun setDimAmount(amount:Float){
+    fun setDimAmount(amount: Float) {
         windowInfo?.layoutParams?.let {
             it.dimAmount = amount
         }
@@ -320,7 +316,7 @@ object FloatWindow : View.OnTouchListener {
      * let ui decide what to do after window clicked
      */
     interface WindowClickListener {
-        fun onWindowClick(windowInfo: WindowInfo?): Boolean
+        fun onWindowClick(view: View, windowInfo: WindowInfo?): Boolean
     }
 
     interface WindowStateListener {
@@ -349,7 +345,7 @@ object FloatWindow : View.OnTouchListener {
         override fun onShowPress(e: MotionEvent) {}
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            return clickChild(e.x.toInt(), e.y.toInt())
+            return findClickableChild(e.x.toInt(), e.y.toInt())
         }
 
         override fun onScroll(
@@ -380,7 +376,7 @@ object FloatWindow : View.OnTouchListener {
         /**
          * find clickable child according to the touch position
          */
-        fun clickChild(x: Int, y: Int): Boolean {
+        fun findClickableChild(x: Int, y: Int): Boolean {
             if (touchFrame == null) {
                 touchFrame = Rect()
             }
@@ -391,11 +387,8 @@ object FloatWindow : View.OnTouchListener {
                     .forEach { child ->
                         if (child.visibility == View.VISIBLE) {
                             child.getHitRect(touchFrame)
-                            if (touchFrame?.contains(x, y).value()
-                                && clickListenerMap?.get(child.id) != null
-                            ) {
-                                return clickListenerMap?.get(child.id)?.onWindowClick(windowInfo)
-                                    .value()
+                            if (touchFrame?.contains(x, y).value()) {
+                                return clickListener?.onWindowClick(child, windowInfo).value()
                             }
                         }
                     }
@@ -408,10 +401,6 @@ object FloatWindow : View.OnTouchListener {
     fun onDestroy() {
         windowInfoMap.clear()
         context = null
-    }
-
-    fun release() {
-        clickListenerMap?.clear()
     }
 
     class WindowInfo(var view: View?) {
