@@ -157,9 +157,9 @@ object FloatWindow : View.OnTouchListener {
     }
 
     fun dismiss() {
-        val windowManager = context?.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val windowManager = context?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
         //in case of "IllegalStateException :not attached to window manager."
-        if (windowInfo?.hasParent().value()) {
+        if (windowManager!= null && windowInfo?.hasParent().value()) {
             windowManager.removeViewImmediate(windowInfo?.view)
             windowStateListener?.onWindowDismiss()
         }
