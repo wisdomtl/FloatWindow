@@ -3,6 +3,7 @@ package taylor.com.floatwindow
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.Point
 import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.util.Log
@@ -16,6 +17,14 @@ import android.view.animation.LinearInterpolator
  * it can be clicked
  */
 object FloatWindow : View.OnTouchListener {
+
+    /**
+     * window showing gravity
+     */
+    const val GRAVITY_TOP = 1
+    const val GRAVITY_LEFT = 2
+    const val GRAVITY_RIGHT = 3
+    const val GRAVITY_BOTTOM = 4
     /**
      * several window content stored by String tag ;
      */
@@ -68,10 +77,19 @@ object FloatWindow : View.OnTouchListener {
         }
     }
 
-    fun updateWindowView(updater: IWindowUpdater?) {
-        updater?.updateWindowView(windowInfo?.view)
+    /**
+     * update window position on the screen
+     */
+    fun updateWindowView(
+        x: Int = windowInfo?.layoutParams?.x.value(),
+        y: Int = windowInfo?.layoutParams?.y.value()
+    ) {
         val windowManager = context?.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         if (windowInfo?.hasParent().value()) {
+            windowInfo?.layoutParams?.apply {
+                this.x = x
+                this.y = y
+            }
             windowManager.updateViewLayout(windowInfo?.view, windowInfo?.layoutParams)
         }
     }
@@ -96,6 +114,7 @@ object FloatWindow : View.OnTouchListener {
      * @param windowInfo the necessary information for showing float window, it will be kept in [windowInfoMap] with the key [tag]
      * @param x the horizontal position of float window according to the left top of screen
      * @param y the vertical position of float window according to the left top of screen
+     * @param dragEnable whether window could be dragged by finger
      */
     fun show(
         context: Context,
@@ -131,6 +150,33 @@ object FloatWindow : View.OnTouchListener {
         }
     }
 
+    /**
+     * show float window according to predefine gravity.
+     *
+     * @param tag a unique tag for a window, if showing the previous window without providing [windowInfo], we will looking for it in [windowInfoMap]
+     * @param windowInfo the necessary information for showing float window, it will be kept in [windowInfoMap] with the key [tag]
+     * @param gravity the gravity of window, could be one of [GRAVITY_BOTTOM], [GRAVITY_RIGHT], [GRAVITY_TOP], [GRAVITY_LEFT]
+     * @param onAnimateWindow the animation which will be played to window after shown
+     */
+    fun show(
+        context: Context,
+        tag: String,
+        windowInfo: WindowInfo? = windowInfoMap[tag],
+        gravity: Int,
+        onAnimateWindow: ((WindowInfo?) -> Unit)?
+    ) {
+        val windowManager = this.context?.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        prepareScreenDimension(windowManager)
+        when (gravity) {
+            GRAVITY_LEFT -> Point(-windowInfo?.width.value(), 0)
+            GRAVITY_TOP -> Point( 0, -windowInfo?.height.value())
+            GRAVITY_RIGHT -> Point(screenWidth, 0)
+            GRAVITY_BOTTOM -> Point(0, screenHeight)
+            else -> Point(0, 0)
+        }.let { show(context, tag, windowInfo, it.x, it.y, false) }
+        windowInfo?.view?.post { onAnimateWindow?.invoke(windowInfo) }
+    }
+
     private fun createLayoutParam(x: Int, y: Int): WindowManager.LayoutParams {
         if (context == null) {
             return WindowManager.LayoutParams()
@@ -142,7 +188,7 @@ object FloatWindow : View.OnTouchListener {
             flags =
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_DIM_BEHIND
             dimAmount = 0f
-            gravity = Gravity.START or Gravity.TOP
+            this.gravity = Gravity.START or Gravity.TOP
             width = windowInfo?.width.value()
             height = windowInfo?.height.value()
             this.x = x
@@ -159,7 +205,7 @@ object FloatWindow : View.OnTouchListener {
     fun dismiss() {
         val windowManager = context?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
         //in case of "IllegalStateException :not attached to window manager."
-        if (windowManager!= null && windowInfo?.hasParent().value()) {
+        if (windowManager != null && windowInfo?.hasParent().value()) {
             windowManager.removeViewImmediate(windowInfo?.view)
             windowStateListener?.onWindowDismiss()
         }

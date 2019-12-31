@@ -12,7 +12,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.view.accessibility.AccessibilityEvent
 import android.view.animation.AccelerateInterpolator
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -30,100 +29,6 @@ class MainActivity : AppCompatActivity() {
     private var animationDrawable: AnimationDrawable? = null
     private var windowInfo: FloatWindow.WindowInfo? = null
 
-
-    val callback = object: Window.Callback{
-        override fun onActionModeFinished(mode: ActionMode?) {
-        }
-
-        override fun onCreatePanelView(featureId: Int): View? {
-            return null
-        }
-
-        override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
-            window.superDispatchTouchEvent(event)
-            Log.v("ttaylor","tag=, MainActivity.dispatchTouchEvent()  event=${event?.action}")
-            return false
-        }
-
-        override fun onCreatePanelMenu(featureId: Int, menu: Menu): Boolean {
-            return false
-        }
-
-        override fun onWindowStartingActionMode(callback: ActionMode.Callback?): ActionMode? {
-            return null
-        }
-
-        override fun onWindowStartingActionMode(
-            callback: ActionMode.Callback?,
-            type: Int
-        ): ActionMode? {
-            return null
-        }
-
-        override fun onAttachedToWindow() {
-
-        }
-
-        override fun dispatchGenericMotionEvent(event: MotionEvent?): Boolean {
-            return false
-        }
-
-        override fun dispatchPopulateAccessibilityEvent(event: AccessibilityEvent?): Boolean {
-            return false
-        }
-
-        override fun dispatchTrackballEvent(event: MotionEvent?): Boolean {
-            return false
-        }
-
-        override fun dispatchKeyShortcutEvent(event: KeyEvent?): Boolean {
-            return false
-        }
-
-        override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
-            return false
-        }
-
-        override fun onMenuOpened(featureId: Int, menu: Menu): Boolean {
-            return false
-        }
-
-        override fun onPanelClosed(featureId: Int, menu: Menu) {
-
-        }
-
-        override fun onMenuItemSelected(featureId: Int, item: MenuItem): Boolean {
-            return false
-        }
-
-        override fun onDetachedFromWindow() {
-        }
-
-        override fun onPreparePanel(featureId: Int, view: View?, menu: Menu): Boolean {
-            return false
-        }
-
-        override fun onWindowAttributesChanged(attrs: WindowManager.LayoutParams?) {
-        }
-
-        override fun onWindowFocusChanged(hasFocus: Boolean) {
-        }
-
-        override fun onContentChanged() {
-        }
-
-        override fun onSearchRequested(): Boolean {
-            return false
-        }
-
-        override fun onSearchRequested(searchEvent: SearchEvent?): Boolean {
-            return false
-        }
-
-        override fun onActionModeStarted(mode: ActionMode?) {
-        }
-
-    }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         printCallStack()
@@ -144,19 +49,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         findViewById<Button>(R.id.tvD).setOnClickListener { _->
-            Intent(this@MainActivity,SecondActivity::class.java).let {
+            Intent(this@MainActivity,SideWindowActivity::class.java).let {
                 startActivity(it)
             }
         }
 
-//        window.callback = callback
     }
 
     override fun onResume() {
         super.onResume()
         showDragableWindow()
-
-//        showSideWindow()
     }
 
     private fun showDragableWindow() {
@@ -167,9 +69,9 @@ class MainActivity : AppCompatActivity() {
             FloatWindow.show(this, TAG_WINDOW_A, windowInfo, 0, 0, true)
         }
         FloatWindow.show(this, TAG_WINDOW_A, dragEnable = true)
-        FloatWindow.setOutsideTouchable(true, {
+        FloatWindow.setOutsideTouchable(true) {
             Log.v("ttaylor", "tag=touch outside, WindowActivity.onResume()  ")
-        })
+        }
     }
 
 
@@ -190,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         return progressRing!!
     }
 
-    fun decodeSampledBitmapFromResource(
+    private fun decodeSampledBitmapFromResource(
         res: Resources?,
         resId: Int,
         reqWidth: Int,

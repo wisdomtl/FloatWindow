@@ -2,16 +2,17 @@ package taylor.com.floatwindow
 
 import android.animation.Animator
 import android.animation.ValueAnimator
-import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.Button
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 
-class SecondActivity : AppCompatActivity() {
+class SideWindowActivity : AppCompatActivity() {
 
     private var intimacyWindowInfo: FloatWindow.WindowInfo? = null
     private var intimacyTranslationX: Int? = null
@@ -20,6 +21,12 @@ class SecondActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.second_activity)
+
+        findViewById<Button>(R.id.btnGravity).setOnClickListener{
+            Intent(this@SideWindowActivity,GravityActivity::class.java).let {
+                startActivity(it)
+            }
+        }
     }
 
     override fun onResume() {
@@ -43,7 +50,7 @@ class SecondActivity : AppCompatActivity() {
             val location = IntArray(2)
             lin.getLocationOnScreen(location)
             intimacyTranslationX =
-                DimensionUtil.dp2px(80.0) - (DimensionUtil.getScreenWidth(this@SecondActivity) - location[0])
+                DimensionUtil.dp2px(80.0) - (DimensionUtil.getScreenWidth(this@SideWindowActivity) - location[0])
         }
         FloatWindow.setClickListener(object : FloatWindow.WindowClickListener {
             override fun onWindowClick(view: View, windowInfo: FloatWindow.WindowInfo?): Boolean {
@@ -84,17 +91,7 @@ class SecondActivity : AppCompatActivity() {
             intimacyAnimator!!.duration = 200
             intimacyAnimator!!.addUpdateListener { animation: ValueAnimator ->
                 val x1 = animation.animatedValue as Int
-                if (windowInfo.layoutParams != null) {
-                    windowInfo.layoutParams!!.x = x1
-                }
-                val windowManager =
-                    getSystemService(Context.WINDOW_SERVICE) as WindowManager
-                if (windowInfo.hasParent()) {
-                    windowManager.updateViewLayout(
-                        windowInfo.view,
-                        windowInfo.layoutParams
-                    )
-                }
+                FloatWindow.updateWindowView(x1)
             }
         } else {
             intimacyAnimator!!.setIntValues(start, end)
