@@ -19,12 +19,15 @@ import android.view.animation.LinearInterpolator
 object FloatWindow : View.OnTouchListener {
 
     /**
-     * window showing gravity
+     * flags of float window's position
      */
-    const val GRAVITY_TOP = 1
-    const val GRAVITY_LEFT = 2
-    const val GRAVITY_RIGHT = 3
-    const val GRAVITY_BOTTOM = 4
+    const val FLAG_TOP = 0x00000010
+    const val FLAG_LEFT = 0x00000020
+    const val FLAG_RIGHT = 0x00000040
+    const val FLAG_BOTTOM = 0x00000080
+    const val FLAG_START = 0x00000001
+    const val FLAG_MID = 0x00000002
+    const val FLAG_END = 0x00000004
     /**
      * several window content stored by String tag ;
      */
@@ -146,6 +149,7 @@ object FloatWindow : View.OnTouchListener {
                 this.context?.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             prepareScreenDimension(windowManager)
             windowManager.addView(windowInfo.view, windowInfo.layoutParams)
+            updateWindowViewSize()
             windowStateListener?.onWindowShow()
         }
     }
@@ -155,26 +159,64 @@ object FloatWindow : View.OnTouchListener {
      *
      * @param tag a unique tag for a window, if showing the previous window without providing [windowInfo], we will looking for it in [windowInfoMap]
      * @param windowInfo the necessary information for showing float window, it will be kept in [windowInfoMap] with the key [tag]
-     * @param gravity the gravity of window, could be one of [GRAVITY_BOTTOM], [GRAVITY_RIGHT], [GRAVITY_TOP], [GRAVITY_LEFT]
+     * @param flag which position to show float window
+     * @param offset the offset value in pixel of position set by [flag]
      * @param onAnimateWindow the animation which will be played to window after shown
      */
     fun show(
         context: Context,
         tag: String,
         windowInfo: WindowInfo? = windowInfoMap[tag],
-        gravity: Int,
+        flag: Int,
+        offset: Int = 0,
         onAnimateWindow: ((WindowInfo?) -> Unit)?
     ) {
+        getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false) }
+        windowInfo?.view?.post { onAnimateWindow?.invoke(windowInfo) }
+    }
+
+    private fun getShowPoint(flag: Int, windowInfo: WindowInfo?, offset: Int): Point {
         val windowManager = this.context?.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         prepareScreenDimension(windowManager)
-        when (gravity) {
-            GRAVITY_LEFT -> Point(-windowInfo?.width.value(), 0)
-            GRAVITY_TOP -> Point( 0, -windowInfo?.height.value())
-            GRAVITY_RIGHT -> Point(screenWidth, 0)
-            GRAVITY_BOTTOM -> Point(0, screenHeight)
+        return when {
+            flag.and(FLAG_TOP) != 0 -> {
+                val y = -windowInfo?.height.value()
+                val x = getValueByGravity(flag, screenWidth, windowInfo?.width.value()) + offset
+                Point(x, y)
+            }
+            flag.and(FLAG_BOTTOM) != 0 -> {
+                val y = screenHeight
+                val x = getValueByGravity(flag, screenWidth, windowInfo?.width.value()) + offset
+                Point(x, y)
+            }
+            flag.and(FLAG_LEFT) != 0 -> {
+                val x = -windowInfo?.width.value()
+                val y = getValueByGravity(flag, screenHeight, windowInfo?.height.value()) + offset
+                Point(x, y)
+            }
+            flag.and(FLAG_RIGHT) != 0 -> {
+                val x = screenWidth
+                val y = getValueByGravity(flag, screenHeight, windowInfo?.height.value()) + offset
+                Point(x, y)
+            }
             else -> Point(0, 0)
-        }.let { show(context, tag, windowInfo, it.x, it.y, false) }
-        windowInfo?.view?.post { onAnimateWindow?.invoke(windowInfo) }
+        }
+    }
+
+    private fun updateWindowViewSize() {
+        windowInfo?.view?.post {
+            windowInfo?.apply {
+                width = view?.width.value()
+                height = view?.height.value()
+            }
+        }
+    }
+
+    private fun getValueByGravity(flag: Int, total: Int, actual: Int): Int = when {
+        flag.and(FLAG_START) != 0 -> 0
+        flag.and(FLAG_MID) != 0 -> (total - actual) / 2
+        flag.and(FLAG_END) != 0 -> (total - actual)
+        else -> 0
     }
 
     private fun createLayoutParam(x: Int, y: Int): WindowManager.LayoutParams {

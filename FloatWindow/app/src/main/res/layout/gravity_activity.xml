@@ -7,14 +7,46 @@
 
 
     <Button
-        android:id="@+id/btnGravity"
+        android:id="@+id/btnGravityTop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="show gravity window"
-        android:textSize="40sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="top window"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@id/btnGravityBottom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <Button
+        android:id="@+id/btnGravityBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="bottom window"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@id/btnGravityLeft"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnGravityTop"/>
+
+    <Button
+        android:id="@+id/btnGravityLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="left window"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@id/btnGravityRight"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnGravityBottom"/>
+
+    <Button
+        android:id="@+id/btnGravityRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="right window"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnGravityLeft"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
