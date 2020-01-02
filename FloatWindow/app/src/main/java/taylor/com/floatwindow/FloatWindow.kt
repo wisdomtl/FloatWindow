@@ -5,16 +5,23 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.Rect
+import android.os.Looper
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
 import android.view.animation.LinearInterpolator
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
+import taylor.com.animation_dsl.AnimSet
+import taylor.com.animation_dsl.animSet
 
 
 /**
- * a window shows above an activity.
- * it can be dragged by finger and if your finger leave the screen, it will stick to the nearest border of the screen
- * it can be clicked
+ * A window shows above an activity. It has the following feature:
+ * 1. clickable: it could react to click event
+ * 2. draggable and sticky: it could be dragged by finger. If finger leave the screen, it will stick to the nearest border of the screen
+ * 3. show with animation: you could use Animation to define how window shows
+ * 4. dismiss automatically with delay: you could specify a time to make it show like a Toast
+ * 5. show in common position: there are 12 predefined position, make it easy to show window in common position
  */
 object FloatWindow : View.OnTouchListener {
 
@@ -68,6 +75,7 @@ object FloatWindow : View.OnTouchListener {
      */
     private var onTouchOutside: (() -> Unit)? = null
 
+    private var handler = android.os.Handler(Looper.getMainLooper())
 
     private fun getNavigationBarHeight(context: Context?): Int {
         val rid = context?.resources?.getIdentifier("config_showNavigationBar", "bool", "android")
@@ -155,7 +163,7 @@ object FloatWindow : View.OnTouchListener {
     }
 
     /**
-     * show float window according to predefine gravity.
+     * show float window according to specific gravity with animation defined in [onAnimateWindow]
      *
      * @param tag a unique tag for a window, if showing the previous window without providing [windowInfo], we will looking for it in [windowInfoMap]
      * @param windowInfo the necessary information for showing float window, it will be kept in [windowInfoMap] with the key [tag]
@@ -175,17 +183,51 @@ object FloatWindow : View.OnTouchListener {
         windowInfo?.view?.post { onAnimateWindow?.invoke(windowInfo) }
     }
 
+    /**
+     * show float window according to specific gravity with default animation and dismiss automatically
+     * @param tag a unique tag for a window, if showing the previous window without providing [windowInfo], we will looking for it in [windowInfoMap]
+     * @param windowInfo the necessary information for showing float window, it will be kept in [windowInfoMap] with the key [tag]
+     * @param flag which position to show float window
+     * @param offset the offset value in pixel of position set by [flag]
+     * @param duration the time span of window show animation
+     * @param stayTime [stayTime] milliseconds after it shows, window will dismiss itself
+     */
+    fun show(
+        context: Context,
+        tag: String,
+        windowInfo: WindowInfo? = windowInfoMap[tag],
+        flag: Int,
+        offset: Int = 0,
+        duration: Long = 250L,
+        stayTime: Long = 1500L
+    ) {
+        getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false) }
+        windowInfo?.view?.post {
+            getShowAnim(flag, windowInfo, duration)?.let { anim ->
+                anim.start()
+                //dismiss itself by delay
+                handler.postDelayed({
+                    anim.reverse()
+                    anim.onEnd = { dismiss(windowInfo)}
+                }, stayTime)
+            }
+        }
+    }
+
+    /**
+     * get the coordinate of window's left-top point on the screen
+     */
     private fun getShowPoint(flag: Int, windowInfo: WindowInfo?, offset: Int): Point {
         val windowManager = this.context?.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         prepareScreenDimension(windowManager)
         return when {
             flag.and(FLAG_TOP) != 0 -> {
-                val y = -windowInfo?.height.value()
+                val y = -windowInfo?.height.value() - getStatusBarHeight()
                 val x = getValueByGravity(flag, screenWidth, windowInfo?.width.value()) + offset
                 Point(x, y)
             }
             flag.and(FLAG_BOTTOM) != 0 -> {
-                val y = screenHeight
+                val y = screenHeight - getStatusBarHeight()
                 val x = getValueByGravity(flag, screenWidth, windowInfo?.width.value()) + offset
                 Point(x, y)
             }
@@ -203,6 +245,55 @@ object FloatWindow : View.OnTouchListener {
         }
     }
 
+    /**
+     * get the predefine animation used to show float window
+     */
+    private fun getShowAnim(flag: Int, windowInfo: WindowInfo?, duration: Long): AnimSet? = when {
+        flag.and(FLAG_TOP) != 0 -> {
+            animSet {
+                anim {
+                    values = intArrayOf(windowInfo?.layoutParams?.y.value(), 0)
+                    this.duration = duration
+                    interpolator = LinearOutSlowInInterpolator()
+                    action = { value -> updateWindowView(y = value as Int) }
+                }
+            }
+        }
+        flag.and(FLAG_BOTTOM) != 0 -> {
+            animSet {
+                anim {
+                    values = intArrayOf(windowInfo?.layoutParams?.y.value(), windowInfo?.layoutParams?.y.value() - windowInfo?.height.value())
+                    this.duration = duration
+                    interpolator = LinearOutSlowInInterpolator()
+                    action = { value -> updateWindowView(y = value as Int) }
+                }
+            }
+        }
+        flag.and(FLAG_LEFT) != 0 -> {
+            animSet {
+                anim {
+                    values = intArrayOf(windowInfo?.layoutParams?.x.value(), 0)
+                    this.duration = duration
+                    interpolator = LinearOutSlowInInterpolator()
+                    action = { value -> updateWindowView(x = value as Int) }
+                }
+            }
+
+        }
+        flag.and(FLAG_RIGHT) != 0 -> {
+            animSet {
+                anim {
+                    values =
+                        intArrayOf(windowInfo?.layoutParams?.x.value(), windowInfo?.layoutParams?.x.value() - windowInfo?.layoutParams?.width.value())
+                    this.duration = duration
+                    interpolator = LinearOutSlowInInterpolator()
+                    action = { value -> updateWindowView(x = value as Int) }
+                }
+            }
+        }
+        else -> null
+    }
+
     private fun updateWindowViewSize() {
         windowInfo?.view?.post {
             windowInfo?.apply {
@@ -212,6 +303,9 @@ object FloatWindow : View.OnTouchListener {
         }
     }
 
+    /**
+     * get the x or y value of float window according to flag
+     */
     private fun getValueByGravity(flag: Int, total: Int, actual: Int): Int = when {
         flag.and(FLAG_START) != 0 -> 0
         flag.and(FLAG_MID) != 0 -> (total - actual) / 2
@@ -244,7 +338,7 @@ object FloatWindow : View.OnTouchListener {
         }
     }
 
-    fun dismiss() {
+    fun dismiss(windowInfo: WindowInfo? = this.windowInfo) {
         val windowManager = context?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
         //in case of "IllegalStateException :not attached to window manager."
         if (windowManager != null && windowInfo?.hasParent().value()) {
@@ -391,6 +485,12 @@ object FloatWindow : View.OnTouchListener {
                 screenHeight = dm.heightPixels
             }
         }
+    }
+
+    fun getStatusBarHeight(): Int {
+        return context?.resources?.let {
+            it.getDimensionPixelSize(it.getIdentifier("status_bar_height", "dimen", "android"))
+        } ?: 0
     }
 
     /**
