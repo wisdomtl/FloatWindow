@@ -177,7 +177,7 @@ object FloatWindow : View.OnTouchListener {
         windowInfo: WindowInfo? = windowInfoMap[tag],
         flag: Int,
         offset: Int = 0,
-        onAnimateWindow: ((WindowInfo?) -> Unit)?
+        onAnimateWindow: ((WindowInfo) -> Unit)?
     ) {
         getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false) }
         windowInfo?.view?.post { onAnimateWindow?.invoke(windowInfo) }

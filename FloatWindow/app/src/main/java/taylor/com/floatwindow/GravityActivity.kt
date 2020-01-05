@@ -1,6 +1,5 @@
 package taylor.com.floatwindow
 
-import android.animation.ValueAnimator
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -47,19 +46,17 @@ class GravityActivity : AppCompatActivity() {
             height = DimensionUtil.dp2px(80.0)
         }
 
-        FloatWindow.show(this, "top", windowInfo, FLAG_TOP or FLAG_MID) { windowInfo ->
-            windowInfo?.layoutParams?.y?.let {
-                val anim = animSet {
-                    anim {
-                        values = intArrayOf(it,0)
-                        interpolator = LinearOutSlowInInterpolator()
-                        duration = 250L
-                        action = {value->FloatWindow.updateWindowView(y = value as Int)}
-                    }
+        FloatWindow.show(this, "top", windowInfo, FLAG_TOP or FLAG_MID) { info ->
+            val anim = animSet {
+                anim {
+                    values = intArrayOf(info.layoutParams?.y ?: 0, 0)
+                    interpolator = LinearOutSlowInInterpolator()
+                    duration = 250L
+                    action = { value -> FloatWindow.updateWindowView(y = value as Int) }
                 }
-                anim.start()
-                handler.postDelayed({anim.reverse()},1500)
             }
+            anim.start()
+            handler.postDelayed({ anim.reverse() }, 1500)
         }
     }
 
@@ -80,7 +77,7 @@ class GravityActivity : AppCompatActivity() {
 //                }
 //            }
 //        }
-        FloatWindow.show(this, "bottom", windowInfo, FLAG_BOTTOM or FLAG_MID,duration = 900L,stayTime = 1000L)
+        FloatWindow.show(this, "bottom", windowInfo, FLAG_BOTTOM or FLAG_MID, duration = 900L, stayTime = 1000L)
     }
 
     private fun showLeftGravityWindow() {
@@ -101,7 +98,7 @@ class GravityActivity : AppCompatActivity() {
 //            }
 //        }
 
-        FloatWindow.show(this, "left", windowInfo, FLAG_LEFT or FLAG_MID,duration = 500L,stayTime = 1000L)
+        FloatWindow.show(this, "left", windowInfo, FLAG_LEFT or FLAG_MID, duration = 500L, stayTime = 1000L)
     }
 
     private fun showRightGravityWindow() {
@@ -122,6 +119,6 @@ class GravityActivity : AppCompatActivity() {
 //            }
 //        }
 
-        FloatWindow.show(this, "right", windowInfo, FLAG_RIGHT or FLAG_MID, offset = -100,duration = 500L,stayTime = 3000L)
+        FloatWindow.show(this, "right", windowInfo, FLAG_RIGHT or FLAG_MID, offset = -100, duration = 500L, stayTime = 3000L)
     }
 }
