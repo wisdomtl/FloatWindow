@@ -54,9 +54,10 @@ class GravityActivity : AppCompatActivity() {
                     duration = 250L
                     action = { value -> FloatWindow.updateWindowView(y = value as Int) }
                 }
+                start()
             }
-            anim.start()
             handler.postDelayed({ anim.reverse() }, 1500)
+            anim
         }
     }
 
@@ -67,16 +68,7 @@ class GravityActivity : AppCompatActivity() {
             height = DimensionUtil.dp2px(80.0)
         }
 
-//        FloatWindow.show(this, "bottom", windowInfo, FLAG_BOTTOM or FLAG_MID) { windowInfo ->
-//            windowInfo?.layoutParams?.y?.let {
-//                ValueAnimator.ofInt(it, it - windowInfo.height).apply {
-//                    interpolator = LinearOutSlowInInterpolator()
-//                    duration = 250L
-//                    addUpdateListener { animation -> FloatWindow.updateWindowView(y = animation.animatedValue as Int) }
-//                    start()
-//                }
-//            }
-//        }
+
         FloatWindow.show(this, "bottom", windowInfo, FLAG_BOTTOM or FLAG_MID, duration = 900L, stayTime = 1000L)
     }
 
@@ -87,17 +79,6 @@ class GravityActivity : AppCompatActivity() {
             height = DimensionUtil.dp2px(200.0)
         }
 
-//        FloatWindow.show(this, "left", windowInfo, FLAG_LEFT or FLAG_MID) { windowInfo ->
-//            windowInfo?.layoutParams?.x?.let {
-//                ValueAnimator.ofInt(it, 0).apply {
-//                    interpolator = LinearOutSlowInInterpolator()
-//                    duration = 250L
-//                    addUpdateListener { animation -> FloatWindow.updateWindowView(x = animation.animatedValue as Int) }
-//                    start()
-//                }
-//            }
-//        }
-
         FloatWindow.show(this, "left", windowInfo, FLAG_LEFT or FLAG_MID, duration = 500L, stayTime = 1000L)
     }
 
@@ -107,17 +88,6 @@ class GravityActivity : AppCompatActivity() {
             width = DimensionUtil.dp2px(80.0)
             height = DimensionUtil.dp2px(200.0)
         }
-
-//        FloatWindow.show(this, "right", windowInfo, FLAG_RIGHT or FLAG_MID, offset = -30) { windowInfo ->
-//            windowInfo?.layoutParams?.x?.let {
-//                ValueAnimator.ofInt(it, it - windowInfo.width).apply {
-//                    interpolator = LinearOutSlowInInterpolator()
-//                    duration = 250L
-//                    addUpdateListener { animation -> FloatWindow.updateWindowView(x = animation.animatedValue as Int) }
-//                    start()
-//                }
-//            }
-//        }
 
         FloatWindow.show(this, "right", windowInfo, FLAG_RIGHT or FLAG_MID, offset = -100, duration = 500L, stayTime = 3000L)
     }

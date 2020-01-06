@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.*
 import android.view.animation.LinearInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
+import taylor.com.animation_dsl.Anim
 import taylor.com.animation_dsl.AnimSet
 import taylor.com.animation_dsl.animSet
 
@@ -63,6 +64,8 @@ object FloatWindow : View.OnTouchListener {
      * the animation make window stick to the left or right side of screen
      */
     private var weltAnimator: ValueAnimator? = null
+
+    private var inAndOutAnim: Anim? = null
 
     val layoutParam: WindowManager.LayoutParams?
         get() = windowInfo?.layoutParams
@@ -177,10 +180,10 @@ object FloatWindow : View.OnTouchListener {
         windowInfo: WindowInfo? = windowInfoMap[tag],
         flag: Int,
         offset: Int = 0,
-        onAnimateWindow: ((WindowInfo) -> Unit)?
+        onAnimateWindow: ((WindowInfo) -> Anim)?
     ) {
         getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false) }
-        windowInfo?.view?.post { onAnimateWindow?.invoke(windowInfo) }
+        windowInfo?.view?.post { inAndOutAnim = onAnimateWindow?.invoke(windowInfo) }
     }
 
     /**
@@ -203,12 +206,12 @@ object FloatWindow : View.OnTouchListener {
     ) {
         getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false) }
         windowInfo?.view?.post {
-            getShowAnim(flag, windowInfo, duration)?.let { anim ->
+            inAndOutAnim = getShowAnim(flag, windowInfo, duration)?.also { anim ->
                 anim.start()
                 //dismiss itself by delay
                 handler.postDelayed({
                     anim.reverse()
-                    anim.onEnd = { dismiss(windowInfo)}
+                    anim.onEnd = { dismiss(windowInfo) }
                 }, stayTime)
             }
         }
@@ -557,6 +560,11 @@ object FloatWindow : View.OnTouchListener {
             velocityX: Float,
             velocityY: Float
         ): Boolean {
+            inAndOutAnim?.let { anim ->
+                anim.reverse()
+                anim.onEnd = { dismiss(windowInfo) }
+                return true
+            }
             return false
         }
 
