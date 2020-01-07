@@ -24,6 +24,7 @@ import taylor.com.animation_dsl.animSet
  * 3. show with animation: you could use Animation to define how window shows
  * 4. dismiss automatically with delay: you could specify a time to make it show like a Toast
  * 5. show in common position: there are 12 predefined position, make it easy to show window in common position
+ * 6. show overall window: this is a kind of window which is visible during the whole app lifecycle
  */
 object FloatWindow : View.OnTouchListener {
 
