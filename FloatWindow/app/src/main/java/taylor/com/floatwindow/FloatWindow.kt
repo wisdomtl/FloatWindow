@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.Rect
+import android.os.Build
 import android.os.Looper
 import android.util.DisplayMetrics
 import android.util.Log
@@ -93,8 +94,10 @@ object FloatWindow : View.OnTouchListener {
 
     /**
      * update window position on the screen
+     * @param windowInfo which window to update
      */
     fun updateWindowView(
+        windowInfo: WindowInfo? = this.windowInfo,
         x: Int = windowInfo?.layoutParams?.x.value(),
         y: Int = windowInfo?.layoutParams?.y.value()
     ) {
@@ -129,6 +132,7 @@ object FloatWindow : View.OnTouchListener {
      * @param x the horizontal position of float window according to the left top of screen
      * @param y the vertical position of float window according to the left top of screen
      * @param dragEnable whether window could be dragged by finger
+     * @param overall whether window is visible during the whole app lifecycle
      */
     fun show(
         context: Context,
@@ -136,7 +140,8 @@ object FloatWindow : View.OnTouchListener {
         windowInfo: WindowInfo? = windowInfoMap[tag],
         x: Int = windowInfo?.layoutParams?.x.value(),
         y: Int = windowInfo?.layoutParams?.y.value(),
-        dragEnable: Boolean = false
+        dragEnable: Boolean = false,
+        overall: Boolean = false
     ) {
         if (windowInfo == null) {
             Log.v("ttaylor", "there is no view to show,please creating the right WindowInfo object")
@@ -153,7 +158,7 @@ object FloatWindow : View.OnTouchListener {
         windowInfoMap[tag] = windowInfo
         windowInfo.view?.setOnTouchListener(this)
         this.context = context
-        windowInfo.layoutParams = createLayoutParam(x, y)
+        windowInfo.layoutParams = createLayoutParam(x, y, overall)
         //in case of "IllegalStateException :has already been added to the window manager."
         if (!windowInfo.hasParent().value()) {
             val windowManager =
@@ -182,7 +187,7 @@ object FloatWindow : View.OnTouchListener {
         offset: Int = 0,
         onAnimateWindow: ((WindowInfo) -> Anim)?
     ) {
-        getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false) }
+        getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false, overall = true) }
         windowInfo?.view?.post { inAndOutAnim = onAnimateWindow?.invoke(windowInfo) }
     }
 
@@ -204,7 +209,7 @@ object FloatWindow : View.OnTouchListener {
         duration: Long = 250L,
         stayTime: Long = 1500L
     ) {
-        getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false) }
+        getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false, overall = true) }
         windowInfo?.view?.post {
             inAndOutAnim = getShowAnim(flag, windowInfo, duration)?.also { anim ->
                 anim.start()
@@ -258,7 +263,7 @@ object FloatWindow : View.OnTouchListener {
                     values = intArrayOf(windowInfo?.layoutParams?.y.value(), 0)
                     this.duration = duration
                     interpolator = LinearOutSlowInInterpolator()
-                    action = { value -> updateWindowView(y = value as Int) }
+                    action = { value -> updateWindowView(windowInfo = windowInfo, y = value as Int) }
                 }
             }
         }
@@ -268,7 +273,7 @@ object FloatWindow : View.OnTouchListener {
                     values = intArrayOf(windowInfo?.layoutParams?.y.value(), windowInfo?.layoutParams?.y.value() - windowInfo?.height.value())
                     this.duration = duration
                     interpolator = LinearOutSlowInInterpolator()
-                    action = { value -> updateWindowView(y = value as Int) }
+                    action = { value -> updateWindowView(windowInfo = windowInfo, y = value as Int) }
                 }
             }
         }
@@ -278,7 +283,7 @@ object FloatWindow : View.OnTouchListener {
                     values = intArrayOf(windowInfo?.layoutParams?.x.value(), 0)
                     this.duration = duration
                     interpolator = LinearOutSlowInInterpolator()
-                    action = { value -> updateWindowView(x = value as Int) }
+                    action = { value -> updateWindowView(windowInfo = windowInfo, x = value as Int) }
                 }
             }
 
@@ -290,7 +295,7 @@ object FloatWindow : View.OnTouchListener {
                         intArrayOf(windowInfo?.layoutParams?.x.value(), windowInfo?.layoutParams?.x.value() - windowInfo?.layoutParams?.width.value())
                     this.duration = duration
                     interpolator = LinearOutSlowInInterpolator()
-                    action = { value -> updateWindowView(x = value as Int) }
+                    action = { value -> updateWindowView(windowInfo = windowInfo, x = value as Int) }
                 }
             }
         }
@@ -316,13 +321,25 @@ object FloatWindow : View.OnTouchListener {
         else -> 0
     }
 
-    private fun createLayoutParam(x: Int, y: Int): WindowManager.LayoutParams {
+    /**
+     * create layout params for window
+     * @param overall whether window is showing during whole app lifecycle
+     */
+    private fun createLayoutParam(x: Int, y: Int, overall: Boolean): WindowManager.LayoutParams {
         if (context == null) {
             return WindowManager.LayoutParams()
         }
 
         return WindowManager.LayoutParams().apply {
-            type = WindowManager.LayoutParams.TYPE_APPLICATION
+            type = if (overall) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                } else {
+                    WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
+                }
+            } else {
+                WindowManager.LayoutParams.TYPE_APPLICATION
+            }
             format = PixelFormat.TRANSLUCENT
             flags =
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_DIM_BEHIND

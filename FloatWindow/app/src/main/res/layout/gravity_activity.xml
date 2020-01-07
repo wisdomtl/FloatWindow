@@ -16,6 +16,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <Button
         android:id="@+id/btnGravityBottom"
         android:layout_width="wrap_content"
@@ -25,7 +26,7 @@
         app:layout_constraintBottom_toTopOf="@id/btnGravityLeft"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnGravityTop"/>
+        app:layout_constraintTop_toBottomOf="@id/btnGravityTop" />
 
     <Button
         android:id="@+id/btnGravityLeft"
@@ -36,7 +37,7 @@
         app:layout_constraintBottom_toTopOf="@id/btnGravityRight"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnGravityBottom"/>
+        app:layout_constraintTop_toBottomOf="@id/btnGravityBottom" />
 
     <Button
         android:id="@+id/btnGravityRight"
@@ -47,6 +48,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnGravityLeft"/>
+        app:layout_constraintTop_toBottomOf="@id/btnGravityLeft" />
+
+
+    <Button
+        android:id="@+id/btnJump"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="jump to another activity"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

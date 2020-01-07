@@ -22,8 +22,8 @@ class SideWindowActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.second_activity)
 
-        findViewById<Button>(R.id.btnGravity).setOnClickListener{
-            Intent(this@SideWindowActivity,GravityActivity::class.java).let {
+        findViewById<Button>(R.id.btnGravity).setOnClickListener {
+            Intent(this@SideWindowActivity, GravityActivity::class.java).let {
                 startActivity(it)
             }
         }
@@ -43,7 +43,7 @@ class SideWindowActivity : AppCompatActivity() {
         }
         val x: Int = DimensionUtil.getScreenWidth(this) - DimensionUtil.dp2px(100.0)
         val y: Int = DimensionUtil.dp2px(75.0)
-        FloatWindow.show(this, "intimacy", intimacyWindowInfo, x, y, true)
+        FloatWindow.show(this, "intimacy", intimacyWindowInfo, x, y, true, overall = true)
         view.post {
             val lin: LinearLayout = view.findViewById(R.id.llContainer)
                 ?: return@post
@@ -56,7 +56,8 @@ class SideWindowActivity : AppCompatActivity() {
             override fun onWindowClick(view: View, windowInfo: FloatWindow.WindowInfo?): Boolean {
                 when (view.id) {
                     R.id.vIntimacy -> onIntimacyClick(windowInfo, x)
-                    else -> { }
+                    else -> {
+                    }
                 }
                 return true
             }
@@ -91,7 +92,7 @@ class SideWindowActivity : AppCompatActivity() {
             intimacyAnimator!!.duration = 200
             intimacyAnimator!!.addUpdateListener { animation: ValueAnimator ->
                 val x1 = animation.animatedValue as Int
-                FloatWindow.updateWindowView(x1)
+                FloatWindow.updateWindowView(windowInfo = windowInfo, x = x1)
             }
         } else {
             intimacyAnimator!!.setIntValues(start, end)

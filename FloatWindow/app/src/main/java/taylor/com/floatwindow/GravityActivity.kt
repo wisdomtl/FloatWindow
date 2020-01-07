@@ -1,5 +1,6 @@
 package taylor.com.floatwindow
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -37,6 +38,9 @@ class GravityActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnGravityRight).setOnClickListener {
             showRightGravityWindow()
         }
+        findViewById<Button>(R.id.btnJump).setOnClickListener {
+            Intent(this@GravityActivity, MainActivity::class.java).let { startActivity(it) }
+        }
     }
 
     private fun showTopGravityWindow() {
@@ -52,11 +56,11 @@ class GravityActivity : AppCompatActivity() {
                     values = intArrayOf(info.layoutParams?.y ?: 0, 0)
                     interpolator = LinearOutSlowInInterpolator()
                     duration = 250L
-                    action = { value -> FloatWindow.updateWindowView(y = value as Int) }
+                    action = { value -> FloatWindow.updateWindowView(windowInfo = windowInfo, y = value as Int) }
                 }
                 start()
             }
-            handler.postDelayed({ anim.reverse() }, 1500)
+            handler.postDelayed({ anim.reverse() }, 2500)
             anim
         }
     }

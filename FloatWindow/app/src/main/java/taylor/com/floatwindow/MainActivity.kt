@@ -66,9 +66,9 @@ class MainActivity : AppCompatActivity() {
             windowInfo = FloatWindow.WindowInfo(generateWindowView())
             windowInfo!!.width = DimensionUtil.dp2px(54.0)
             windowInfo!!.height = DimensionUtil.dp2px(54.0)
-            FloatWindow.show(this, TAG_WINDOW_A, windowInfo, 0, 0, true)
+            FloatWindow.show(this, TAG_WINDOW_A, windowInfo, 0, 0, true,false)
         }
-        FloatWindow.show(this, TAG_WINDOW_A, dragEnable = true)
+        FloatWindow.show(this, TAG_WINDOW_A, dragEnable = true, overall =false)
         FloatWindow.setOutsideTouchable(true) {
             Log.v("ttaylor", "tag=touch outside, WindowActivity.onResume()  ")
         }
