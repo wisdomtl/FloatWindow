@@ -520,6 +520,9 @@ object FloatWindow : View.OnTouchListener {
      * let ui decide what to do after window clicked
      */
     interface WindowClickListener {
+        /**
+         * @param view the child of window view which has been clicked
+         */
         fun onWindowClick(view: View, windowInfo: WindowInfo?): Boolean
     }
 
