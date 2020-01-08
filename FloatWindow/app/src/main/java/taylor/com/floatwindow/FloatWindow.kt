@@ -162,10 +162,9 @@ object FloatWindow : View.OnTouchListener {
         windowInfo.layoutParams = createLayoutParam(x, y, overall)
         //in case of "IllegalStateException :has already been added to the window manager."
         if (!windowInfo.hasParent().value()) {
-            val windowManager =
-                this.context?.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            val windowManager = this.context?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
             prepareScreenDimension(windowManager)
-            windowManager.addView(windowInfo.view, windowInfo.layoutParams)
+            windowManager?.addView(windowInfo.view, windowInfo.layoutParams)
             updateWindowViewSize()
             windowStateListener?.onWindowShow()
         }
@@ -227,7 +226,7 @@ object FloatWindow : View.OnTouchListener {
      * get the coordinate of window's left-top point on the screen
      */
     private fun getShowPoint(flag: Int, windowInfo: WindowInfo?, offset: Int): Point {
-        val windowManager = this.context?.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val windowManager = this.context?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
         prepareScreenDimension(windowManager)
         return when {
             flag.and(FLAG_TOP) != 0 -> {
@@ -425,10 +424,9 @@ object FloatWindow : View.OnTouchListener {
                     if (windowInfo?.layoutParams != null) {
                         windowInfo?.layoutParams!!.x = x
                     }
-                    val windowManager =
-                        context?.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                    val windowManager = context?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
                     if (windowInfo?.hasParent().value()) {
-                        windowManager.updateViewLayout(windowInfo?.view, windowInfo?.layoutParams)
+                        windowManager?.updateViewLayout(windowInfo?.view, windowInfo?.layoutParams)
                     }
                 }
             }
@@ -446,7 +444,7 @@ object FloatWindow : View.OnTouchListener {
 
         windowInfo?.layoutParams!!.x += dx
         windowInfo?.layoutParams!!.y += dy
-        val windowManager = context?.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val windowManager = context?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
         var rightMost = screenWidth - windowInfo?.layoutParams!!.width
         var leftMost = 0
         val topMost = 0
@@ -483,7 +481,7 @@ object FloatWindow : View.OnTouchListener {
         if (windowInfo?.layoutParams!!.y > bottomMost) {
             windowInfo?.layoutParams!!.y = bottomMost
         }
-        windowManager.updateViewLayout(windowInfo?.view, windowInfo?.layoutParams)
+        windowManager?.updateViewLayout(windowInfo?.view, windowInfo?.layoutParams)
         lastTouchX = currentX
         lastTouchY = currentY
     }
