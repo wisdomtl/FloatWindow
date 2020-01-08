@@ -39,7 +39,7 @@ class GravityActivity : AppCompatActivity() {
             showRightGravityWindow()
         }
         findViewById<Button>(R.id.btnJump).setOnClickListener {
-            Intent(this@GravityActivity, MainActivity::class.java).let { startActivity(it) }
+            startActivity(Intent(this@GravityActivity, MainActivity::class.java))
         }
     }
 

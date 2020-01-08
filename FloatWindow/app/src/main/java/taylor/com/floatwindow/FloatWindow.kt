@@ -575,7 +575,6 @@ object FloatWindow : View.OnTouchListener {
         ): Boolean {
             inAndOutAnim?.let { anim ->
                 anim.reverse()
-                anim.onEnd = { dismiss(windowInfo) }
                 return true
             }
             return false

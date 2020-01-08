@@ -39,11 +39,14 @@ class AnimSet : Anim() {
 
     private val anims by lazy { mutableListOf<Anim>() }
 
-
     /**
-     * has played reversely
+     * whether animation is at start point
      */
-    private var isReverse: Boolean = false
+    private var isAtStartPoint: Boolean = true
+    /**
+     * whether animation value has reversed
+     */
+    private var hasReverse: Boolean = false
 
     /**
      * it creates a single [ValueAnim]
@@ -54,17 +57,20 @@ class AnimSet : Anim() {
     /**
      * build an [ObjectAnim] with a much shorter and readable code by DSL
      */
-    fun objectAnim(action: ObjectAnim.() -> Unit): Anim = ObjectAnim().apply(action).also { it.setPropertyValueHolder() }.also { it.addListener() }.also { anims.add(it) }
+    fun objectAnim(action: ObjectAnim.() -> Unit): Anim =
+        ObjectAnim().apply(action).also { it.setPropertyValueHolder() }.also { it.addListener() }.also { anims.add(it) }
 
     /**
      * start the [AnimSet]
      */
     fun start() {
         if (animatorSet.isRunning) return
-        anims.takeIf { isReverse }?.forEach { anim -> anim.reverse() }
+        anims.takeIf { hasReverse }?.forEach { anim -> anim.reverse() }.also { hasReverse = false }
         if (anims.size == 1) animatorSet.play(anims.first().animator)
-        animatorSet.start()
-        isReverse = false
+        if (isAtStartPoint) {
+            animatorSet.start()
+            isAtStartPoint = false
+        }
     }
 
     /**
@@ -72,9 +78,12 @@ class AnimSet : Anim() {
      */
     override fun reverse() {
         if (animatorSet.isRunning) return
-        anims.takeIf { !isReverse }?.forEach { anim -> anim.reverse() }
-        animatorSet.start()
-        isReverse = true
+        anims.takeIf { !hasReverse }?.forEach { anim -> anim.reverse() }.also { hasReverse = true }
+        if (!isAtStartPoint) {
+            animatorSet.start()
+            isAtStartPoint = true
+        }
+
     }
 
     override fun toBeginning() {
