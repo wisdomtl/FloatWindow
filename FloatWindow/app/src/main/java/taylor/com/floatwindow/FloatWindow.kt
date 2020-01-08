@@ -417,16 +417,16 @@ object FloatWindow : View.OnTouchListener {
             0
         }
 
-        if(stickyAnim == null){
+        if (stickyAnim == null) {
             stickyAnim = animSet {
                 anim {
                     values = intArrayOf(windowInfo?.layoutParams!!.x, endX)
                     interpolator = AccelerateDecelerateInterpolator()
                     duration = WELT_ANIMATION_DURATION
-                    action = {value-> updateWindowView(x= value as Int)}
+                    action = { value -> updateWindowView(x = value as Int) }
                 }
             }
-        }else {
+        } else {
             (stickyAnim?.getAnim(0) as? ValueAnim)?.let { it.values = intArrayOf(windowInfo?.layoutParams!!.x, endX) }
         }
         stickyAnim?.start()
@@ -552,7 +552,12 @@ object FloatWindow : View.OnTouchListener {
         override fun onShowPress(e: MotionEvent) {}
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            return findClickableChild(e.x.toInt(), e.y.toInt())
+            //find clicked child view first. If there is none, we consider the root of window view is clicked
+            return if (findClickableChild(e.x.toInt(), e.y.toInt())) {
+                true
+            } else {
+                windowInfo?.view?.let { clickListener?.onWindowClick(it, windowInfo) } ?: false
+            }
         }
 
         override fun onScroll(

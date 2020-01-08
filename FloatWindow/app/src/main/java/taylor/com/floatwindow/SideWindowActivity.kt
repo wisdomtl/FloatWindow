@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
@@ -11,6 +12,7 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 
 class SideWindowActivity : AppCompatActivity() {
 
@@ -57,6 +59,7 @@ class SideWindowActivity : AppCompatActivity() {
                 when (view.id) {
                     R.id.vIntimacy -> onIntimacyClick(windowInfo, x)
                     else -> {
+                        Log.v("ttaylor","tag=, SideWindowActivity.onWindowClick()  id=${view.id},sideContainer id=${view.findViewById<ConstraintLayout>(R.id.sideContainer).id}")
                     }
                 }
                 return true
