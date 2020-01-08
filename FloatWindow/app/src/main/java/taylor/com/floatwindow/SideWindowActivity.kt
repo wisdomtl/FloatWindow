@@ -43,7 +43,7 @@ class SideWindowActivity : AppCompatActivity() {
         }
         val x: Int = DimensionUtil.getScreenWidth(this) - DimensionUtil.dp2px(100.0)
         val y: Int = DimensionUtil.dp2px(75.0)
-        FloatWindow.show(this, "intimacy", intimacyWindowInfo, x, y, true, overall = true)
+        FloatWindow.show(this, "intimacy", intimacyWindowInfo, x, y, true )
         view.post {
             val lin: LinearLayout = view.findViewById(R.id.llContainer)
                 ?: return@post

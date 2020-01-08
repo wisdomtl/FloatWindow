@@ -187,6 +187,7 @@ object FloatWindow : View.OnTouchListener {
         offset: Int = 0,
         onAnimateWindow: ((WindowInfo) -> Anim)?
     ) {
+        this.context = context
         getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false, overall = true) }
         windowInfo?.view?.post { inAndOutAnim = onAnimateWindow?.invoke(windowInfo) }
     }
@@ -209,6 +210,7 @@ object FloatWindow : View.OnTouchListener {
         duration: Long = 250L,
         stayTime: Long = 1500L
     ) {
+        this.context = context
         getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false, overall = true) }
         windowInfo?.view?.post {
             inAndOutAnim = getShowAnim(flag, windowInfo, duration)?.also { anim ->
