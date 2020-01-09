@@ -192,7 +192,8 @@ object FloatWindow : View.OnTouchListener {
      * @param tag a unique tag for a window, if showing the previous window without providing [windowInfo], we will looking for it in [windowInfoMap]
      * @param windowInfo the necessary information for showing float window, it will be kept in [windowInfoMap] with the key [tag]
      * @param flag which position to show float window
-     * @param offset the offset value in pixel of position set by [flag]
+     * @param gravityOffset the offset value in pixel in gravity
+     * @param positionOffset the offset value in pixel in position
      * @param duration the time span of window show animation
      * @param stayTime [stayTime] milliseconds after it shows, window will dismiss itself
      */
@@ -201,14 +202,15 @@ object FloatWindow : View.OnTouchListener {
         tag: String,
         windowInfo: WindowInfo? = windowInfoMap[tag],
         flag: Int,
-        offset: Int = 0,
+        gravityOffset: Int = 0,
+        positionOffset: Int = 0,
         duration: Long = 250L,
         stayTime: Long = 1500L
     ) {
         this.context = context
-        getShowPoint(flag, windowInfo, offset).let { show(context, tag, windowInfo, it.x, it.y, false, overall = true) }
+        getShowPoint(flag, windowInfo, gravityOffset).let { show(context, tag, windowInfo, it.x, it.y, false, overall = true) }
         windowInfo?.view?.post {
-            inAndOutAnim = getShowAnim(flag, windowInfo, duration)?.also { anim ->
+            inAndOutAnim = getShowAnim(flag, windowInfo, duration, positionOffset)?.also { anim ->
                 anim.start()
                 //dismiss itself by delay
                 handler.postDelayed({
@@ -253,11 +255,16 @@ object FloatWindow : View.OnTouchListener {
     /**
      * get the predefine animation used to show float window
      */
-    private fun getShowAnim(flag: Int, windowInfo: WindowInfo?, duration: Long): AnimSet? = when {
+    private fun getShowAnim(
+        flag: Int,
+        windowInfo: WindowInfo?,
+        duration: Long,
+        positionOffset: Int
+    ): AnimSet? = when {
         flag.and(FLAG_TOP) != 0 -> {
             animSet {
                 anim {
-                    values = intArrayOf(windowInfo?.layoutParams?.y.value(), 0)
+                    values = intArrayOf(windowInfo?.layoutParams?.y.value(), positionOffset)
                     this.duration = duration
                     interpolator = LinearOutSlowInInterpolator()
                     action = { value -> updateWindowView(windowInfo = windowInfo, y = value as Int) }
@@ -267,7 +274,10 @@ object FloatWindow : View.OnTouchListener {
         flag.and(FLAG_BOTTOM) != 0 -> {
             animSet {
                 anim {
-                    values = intArrayOf(windowInfo?.layoutParams?.y.value(), windowInfo?.layoutParams?.y.value() - windowInfo?.height.value())
+                    values = intArrayOf(
+                        windowInfo?.layoutParams?.y.value(),
+                        windowInfo?.layoutParams?.y.value() - windowInfo?.height.value() - positionOffset
+                    )
                     this.duration = duration
                     interpolator = LinearOutSlowInInterpolator()
                     action = { value -> updateWindowView(windowInfo = windowInfo, y = value as Int) }
@@ -277,7 +287,7 @@ object FloatWindow : View.OnTouchListener {
         flag.and(FLAG_LEFT) != 0 -> {
             animSet {
                 anim {
-                    values = intArrayOf(windowInfo?.layoutParams?.x.value(), 0)
+                    values = intArrayOf(windowInfo?.layoutParams?.x.value(), positionOffset)
                     this.duration = duration
                     interpolator = LinearOutSlowInInterpolator()
                     action = { value -> updateWindowView(windowInfo = windowInfo, x = value as Int) }
@@ -289,7 +299,10 @@ object FloatWindow : View.OnTouchListener {
             animSet {
                 anim {
                     values =
-                        intArrayOf(windowInfo?.layoutParams?.x.value(), windowInfo?.layoutParams?.x.value() - windowInfo?.layoutParams?.width.value())
+                        intArrayOf(
+                            windowInfo?.layoutParams?.x.value(),
+                            windowInfo?.layoutParams?.x.value() - windowInfo?.layoutParams?.width.value() - positionOffset
+                        )
                     this.duration = duration
                     interpolator = LinearOutSlowInInterpolator()
                     action = { value -> updateWindowView(windowInfo = windowInfo, x = value as Int) }

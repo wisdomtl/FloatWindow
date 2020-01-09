@@ -74,7 +74,7 @@ class GravityActivity : AppCompatActivity() {
         }
 
         FloatWindow.onFling = { Log.v("ttaylor", "tag=, GravityActivity.onFling()  ") }
-        FloatWindow.show(this, "bottom", windowInfo, FLAG_BOTTOM or FLAG_MID, duration = 900L, stayTime = 1000L)
+        FloatWindow.show(this, "bottom", windowInfo, FLAG_BOTTOM or FLAG_MID,positionOffset = 100, duration = 900L, stayTime = 1000L)
     }
 
     private fun showLeftGravityWindow() {
@@ -84,7 +84,7 @@ class GravityActivity : AppCompatActivity() {
             height = DimensionUtil.dp2px(200.0)
         }
 
-        FloatWindow.show(this, "left", windowInfo, FLAG_LEFT or FLAG_MID, duration = 500L, stayTime = 1000L)
+        FloatWindow.show(this, "left", windowInfo, FLAG_LEFT or FLAG_MID,positionOffset = 50, duration = 500L, stayTime = 1000L)
     }
 
     private fun showRightGravityWindow() {
@@ -94,6 +94,6 @@ class GravityActivity : AppCompatActivity() {
             height = DimensionUtil.dp2px(200.0)
         }
 
-        FloatWindow.show(this, "right", windowInfo, FLAG_RIGHT or FLAG_MID, offset = -100, duration = 500L, stayTime = 3000L)
+        FloatWindow.show(this, "right", windowInfo, FLAG_RIGHT or FLAG_MID, gravityOffset = -100,positionOffset = 200, duration = 500L, stayTime = 3000L)
     }
 }
