@@ -10,6 +10,7 @@ import android.os.Looper
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import taylor.com.animation_dsl.Anim
@@ -424,7 +425,7 @@ object FloatWindow : View.OnTouchListener {
 
         if (weltAnimator == null) {
             weltAnimator = ValueAnimator.ofInt(windowInfo?.layoutParams!!.x, endX).apply {
-                interpolator = LinearInterpolator()
+                interpolator = AccelerateDecelerateInterpolator()
                 duration = WELT_ANIMATION_DURATION
                 addUpdateListener { animation ->
                     val x = animation.animatedValue as Int
