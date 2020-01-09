@@ -1,5 +1,6 @@
 package taylor.com.floatwindow
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.Point
@@ -9,11 +10,10 @@ import android.os.Looper
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
-import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.LinearInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import taylor.com.animation_dsl.Anim
 import taylor.com.animation_dsl.AnimSet
-import taylor.com.animation_dsl.ValueAnim
 import taylor.com.animation_dsl.animSet
 
 
@@ -66,7 +66,7 @@ object FloatWindow : View.OnTouchListener {
     /**
      * the animation make window stick to the left or right side of screen
      */
-    private var stickyAnim: AnimSet? = null
+    private var weltAnimator: ValueAnimator? = null
 
     private var inAndOutAnim: Anim? = null
 
@@ -422,19 +422,24 @@ object FloatWindow : View.OnTouchListener {
             0
         }
 
-        if (stickyAnim == null) {
-            stickyAnim = animSet {
-                anim {
-                    values = intArrayOf(windowInfo?.layoutParams!!.x, endX)
-                    interpolator = AccelerateDecelerateInterpolator()
-                    duration = WELT_ANIMATION_DURATION
-                    action = { value -> updateWindowView(x = value as Int) }
+        if (weltAnimator == null) {
+            weltAnimator = ValueAnimator.ofInt(windowInfo?.layoutParams!!.x, endX).apply {
+                interpolator = LinearInterpolator()
+                duration = WELT_ANIMATION_DURATION
+                addUpdateListener { animation ->
+                    val x = animation.animatedValue as Int
+                    if (windowInfo?.layoutParams != null) {
+                        windowInfo?.layoutParams!!.x = x
+                    }
+                    val windowManager = context?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
+                    if (windowInfo?.hasParent().value()) {
+                        windowManager?.updateViewLayout(windowInfo?.view, windowInfo?.layoutParams)
+                    }
                 }
             }
-        } else {
-            (stickyAnim?.getAnim(0) as? ValueAnim)?.let { it.values = intArrayOf(windowInfo?.layoutParams!!.x, endX) }
         }
-        stickyAnim?.start()
+        weltAnimator?.setIntValues(windowInfo?.layoutParams!!.x, endX)
+        weltAnimator?.start()
     }
 
 
