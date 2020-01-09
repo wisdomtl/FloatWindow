@@ -11,7 +11,6 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.LinearInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import taylor.com.animation_dsl.Anim
 import taylor.com.animation_dsl.AnimSet
@@ -51,9 +50,6 @@ object FloatWindow : View.OnTouchListener {
     private var screenHeight: Int = 0
     private var context: Context? = null
     private var gestureDetector: GestureDetector = GestureDetector(context, GestureListener())
-    private var windowStateListener: WindowStateListener? = null
-    private var clickListener: WindowClickListener? = null
-    private var flingListener: WindowFlingListener? = null
     private var dragEnable: Boolean = false
     /**
      * this list records the activities which shows this window
@@ -81,6 +77,11 @@ object FloatWindow : View.OnTouchListener {
      * listener invoked when touch outside of [FloatWindow]
      */
     private var onTouchOutside: (() -> Unit)? = null
+    var onWindowShow: (() -> Unit)? = null
+    var onWindowDismiss: (() -> Unit)? = null
+    var onWindowMove: ((Float, Float, Int, Int, WindowManager.LayoutParams?) -> WindowManager.LayoutParams)? = null
+    var onFling: (() -> Unit)? = null
+    var onWindowClick: ((View, WindowInfo?) -> Boolean)? = null
 
     private var handler = android.os.Handler(Looper.getMainLooper())
 
@@ -114,22 +115,10 @@ object FloatWindow : View.OnTouchListener {
         }
     }
 
-    fun setClickListener(listener: WindowClickListener) {
-        this.clickListener = listener
-    }
-
-    fun setFlingListener(listener: WindowFlingListener){
-        this.flingListener = listener
-    }
-
     fun setEnable(enable: Boolean, tag: String) {
         val windowInfo = windowInfoMap[tag]
             ?: throw RuntimeException("no such window view,please invoke setView() first")
         windowInfo.enable = enable
-    }
-
-    fun setWindowStateListener(windowStateListener: WindowStateListener) {
-        this.windowStateListener = windowStateListener
     }
 
     /**
@@ -172,7 +161,7 @@ object FloatWindow : View.OnTouchListener {
             prepareScreenDimension(windowManager)
             windowManager?.addView(windowInfo.view, windowInfo.layoutParams)
             updateWindowViewSize()
-            windowStateListener?.onWindowShow()
+            onWindowShow?.invoke()
         }
     }
 
@@ -371,7 +360,7 @@ object FloatWindow : View.OnTouchListener {
         //in case of "IllegalStateException :not attached to window manager."
         if (windowManager != null && windowInfo?.hasParent().value()) {
             windowManager.removeViewImmediate(windowInfo?.view)
-            windowStateListener?.onWindowDismiss()
+            onWindowDismiss?.invoke()
         }
     }
 
@@ -459,13 +448,7 @@ object FloatWindow : View.OnTouchListener {
         val bottomMost =
             screenHeight - windowInfo?.layoutParams!!.height - getNavigationBarHeight(context)
         var partnerParam: WindowManager.LayoutParams? = null
-        partnerParam = windowStateListener?.onWindowMove(
-            dx.toFloat(),
-            dy.toFloat(),
-            screenWidth,
-            screenHeight,
-            windowInfo?.layoutParams
-        )
+        partnerParam = onWindowMove?.invoke(dx.toFloat(), dy.toFloat(), screenWidth, screenHeight, windowInfo?.layoutParams)
         //adjust move area according to partner window
         if (partnerParam != null) {
             if (partnerParam.x < windowInfo?.layoutParams!!.x) {
@@ -520,43 +503,7 @@ object FloatWindow : View.OnTouchListener {
         } ?: 0
     }
 
-    /**
-     * let ui decide how to update window
-     */
-    interface IWindowUpdater {
-        fun updateWindowView(windowView: View?)
-    }
 
-    /**
-     * let ui decide what to do after window clicked
-     */
-    interface WindowClickListener {
-        /**
-         * @param view the child of window view which has been clicked
-         */
-        fun onWindowClick(view: View, windowInfo: WindowInfo?): Boolean
-    }
-
-    /**
-     * let ui decide when fling gesture happened
-     */
-    interface WindowFlingListener{
-        fun onFling()
-    }
-
-    interface WindowStateListener {
-        fun onWindowShow()
-
-        fun onWindowDismiss()
-
-        fun onWindowMove(
-            dx: Float,
-            dy: Float,
-            screenWidth: Int,
-            screenHeight: Int,
-            layoutParams: WindowManager.LayoutParams?
-        ): WindowManager.LayoutParams
-    }
 
     private class GestureListener : GestureDetector.OnGestureListener {
 
@@ -574,7 +521,7 @@ object FloatWindow : View.OnTouchListener {
             return if (findClickableChild(e.x.toInt(), e.y.toInt())) {
                 true
             } else {
-                windowInfo?.view?.let { clickListener?.onWindowClick(it, windowInfo) } ?: false
+                windowInfo?.view?.let { onWindowClick?.invoke(it, windowInfo) } ?: false
             }
         }
 
@@ -599,8 +546,7 @@ object FloatWindow : View.OnTouchListener {
             velocityX: Float,
             velocityY: Float
         ): Boolean {
-            Log.v("ttaylor","tag=, GestureListener.onFling()  ")
-            flingListener?.onFling()
+            onFling?.invoke()
             inAndOutAnim?.let { anim ->
                 anim.reverse()
                 return true
@@ -624,7 +570,7 @@ object FloatWindow : View.OnTouchListener {
                         if (child.visibility == View.VISIBLE) {
                             child.getHitRect(touchFrame)
                             if (touchFrame?.contains(x, y).value()) {
-                                return clickListener?.onWindowClick(child, windowInfo).value()
+                                return onWindowClick?.invoke(child, windowInfo).value()
                             }
                         }
                     }

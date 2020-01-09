@@ -62,6 +62,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showDragableWindow() {
+        FloatWindow.onWindowShow = {
+            Log.v("ttaylor","tag=, MainActivity.showDragableWindow() onWindowShow ")
+        }
         if (windowInfo == null) {
             windowInfo = FloatWindow.WindowInfo(generateWindowView())
             windowInfo!!.width = DimensionUtil.dp2px(54.0)

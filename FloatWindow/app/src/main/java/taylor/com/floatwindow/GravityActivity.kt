@@ -73,11 +73,7 @@ class GravityActivity : AppCompatActivity() {
             height = DimensionUtil.dp2px(80.0)
         }
 
-        FloatWindow.setFlingListener(object :FloatWindow.WindowFlingListener{
-            override fun onFling() {
-                Log.v("ttaylor","tag=, GravityActivity.onFling()  ")
-            }
-        })
+        FloatWindow.onFling = { Log.v("ttaylor", "tag=, GravityActivity.onFling()  ") }
         FloatWindow.show(this, "bottom", windowInfo, FLAG_BOTTOM or FLAG_MID, duration = 900L, stayTime = 1000L)
     }
 
