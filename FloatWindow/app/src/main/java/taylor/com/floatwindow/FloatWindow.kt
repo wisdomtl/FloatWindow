@@ -52,6 +52,7 @@ object FloatWindow : View.OnTouchListener {
     private var gestureDetector: GestureDetector = GestureDetector(context, GestureListener())
     private var windowStateListener: WindowStateListener? = null
     private var clickListener: WindowClickListener? = null
+    private var flingListener: WindowFlingListener? = null
     private var dragEnable: Boolean = false
     /**
      * this list records the activities which shows this window
@@ -114,6 +115,10 @@ object FloatWindow : View.OnTouchListener {
 
     fun setClickListener(listener: WindowClickListener) {
         this.clickListener = listener
+    }
+
+    fun setFlingListener(listener: WindowFlingListener){
+        this.flingListener = flingListener
     }
 
     fun setEnable(enable: Boolean, tag: String) {
@@ -526,6 +531,13 @@ object FloatWindow : View.OnTouchListener {
         fun onWindowClick(view: View, windowInfo: WindowInfo?): Boolean
     }
 
+    /**
+     * let ui decide when fling gesture happened
+     */
+    interface WindowFlingListener{
+        fun onFling()
+    }
+
     interface WindowStateListener {
         fun onWindowShow()
 
@@ -581,6 +593,7 @@ object FloatWindow : View.OnTouchListener {
             velocityX: Float,
             velocityY: Float
         ): Boolean {
+            flingListener?.onFling()
             inAndOutAnim?.let { anim ->
                 anim.reverse()
                 return true
