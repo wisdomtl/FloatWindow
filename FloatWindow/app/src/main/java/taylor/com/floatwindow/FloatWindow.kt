@@ -118,7 +118,7 @@ object FloatWindow : View.OnTouchListener {
     }
 
     fun setFlingListener(listener: WindowFlingListener){
-        this.flingListener = flingListener
+        this.flingListener = listener
     }
 
     fun setEnable(enable: Boolean, tag: String) {
@@ -593,6 +593,7 @@ object FloatWindow : View.OnTouchListener {
             velocityX: Float,
             velocityY: Float
         ): Boolean {
+            Log.v("ttaylor","tag=, GestureListener.onFling()  ")
             flingListener?.onFling()
             inAndOutAnim?.let { anim ->
                 anim.reverse()

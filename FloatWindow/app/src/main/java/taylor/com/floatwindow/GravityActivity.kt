@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -72,7 +73,11 @@ class GravityActivity : AppCompatActivity() {
             height = DimensionUtil.dp2px(80.0)
         }
 
-
+        FloatWindow.setFlingListener(object :FloatWindow.WindowFlingListener{
+            override fun onFling() {
+                Log.v("ttaylor","tag=, GravityActivity.onFling()  ")
+            }
+        })
         FloatWindow.show(this, "bottom", windowInfo, FLAG_BOTTOM or FLAG_MID, duration = 900L, stayTime = 1000L)
     }
 
