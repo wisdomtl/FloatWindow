@@ -38,6 +38,7 @@ object FloatWindow : View.OnTouchListener {
     const val FLAG_START = 0x00000001
     const val FLAG_MID = 0x00000002
     const val FLAG_END = 0x00000004
+
     /**
      * several window content stored by String tag ;
      */
@@ -51,15 +52,18 @@ object FloatWindow : View.OnTouchListener {
     private var context: Context? = null
     private var gestureDetector: GestureDetector = GestureDetector(context, GestureListener())
     private var dragEnable: Boolean = false
+
     /**
      * this list records the activities which shows this window
      */
     private var whiteList: List<Class<Any>>? = mutableListOf()
+
     /**
      * if true,whiteList will be used to depend which activity could show window
      * if false,all activities in app is allow to show window
      */
     private var enableWhileList: Boolean = false
+
     /**
      * the animation make window stick to the left or right side of screen
      */
@@ -129,6 +133,7 @@ object FloatWindow : View.OnTouchListener {
      * @param y the vertical position of float window according to the left top of screen
      * @param dragEnable whether window could be dragged by finger
      * @param overall whether window is visible during the whole app lifecycle
+     * @param penetrate whether touch event could penetrate this window
      */
     fun show(
         context: Context,
@@ -137,7 +142,8 @@ object FloatWindow : View.OnTouchListener {
         x: Int = windowInfo?.layoutParams?.x.value(),
         y: Int = windowInfo?.layoutParams?.y.value(),
         dragEnable: Boolean = false,
-        overall: Boolean = false
+        overall: Boolean = false,
+        penetrate: Boolean = false
     ) {
         if (windowInfo == null) {
             Log.v("ttaylor", "there is no view to show,please creating the right WindowInfo object")
@@ -153,8 +159,11 @@ object FloatWindow : View.OnTouchListener {
         this.dragEnable = dragEnable
         windowInfoMap[tag] = windowInfo
         windowInfo.view?.setOnTouchListener(this)
+        if (penetrate) {
+            windowInfo.view?.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
         this.context = context
-        windowInfo.layoutParams = createLayoutParam(x, y, overall)
+        windowInfo.layoutParams = createLayoutParam(x, y, overall, penetrate)
         //in case of "IllegalStateException :has already been added to the window manager."
         if (!windowInfo.hasParent().value()) {
             val windowManager = this.context?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
@@ -335,7 +344,7 @@ object FloatWindow : View.OnTouchListener {
      * create layout params for window
      * @param overall whether window is showing during whole app lifecycle
      */
-    private fun createLayoutParam(x: Int, y: Int, overall: Boolean): WindowManager.LayoutParams {
+    private fun createLayoutParam(x: Int, y: Int, overall: Boolean, penetrate: Boolean): WindowManager.LayoutParams {
         if (context == null) {
             return WindowManager.LayoutParams()
         }
@@ -351,8 +360,11 @@ object FloatWindow : View.OnTouchListener {
                 WindowManager.LayoutParams.TYPE_APPLICATION
             }
             format = PixelFormat.TRANSLUCENT
-            flags =
+            flags = if (!penetrate) {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_DIM_BEHIND
+            } else {
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_FULLSCREEN
+            }
             dimAmount = 0f
             this.gravity = Gravity.START or Gravity.TOP
             width = windowInfo?.width.value()
@@ -517,7 +529,6 @@ object FloatWindow : View.OnTouchListener {
     }
 
 
-
     private class GestureListener : GestureDetector.OnGestureListener {
 
         private var touchFrame: Rect? = null
@@ -603,14 +614,17 @@ object FloatWindow : View.OnTouchListener {
          * the layout param of window content view
          */
         var layoutParams: WindowManager.LayoutParams? = null
+
         /**
          * whether this window content is allow to show
          */
         var enable = true
+
         /**
          * the width of window content
          */
         var width: Int = 0
+
         /**
          * the height of window content
          */

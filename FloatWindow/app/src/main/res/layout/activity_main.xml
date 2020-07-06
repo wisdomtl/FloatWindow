@@ -27,5 +27,27 @@
         android:textSize="40sp"
         app:layout_constraintTop_toBottomOf="@id/tvtitle"/>
 
+    <Button
+        android:id="@+id/btnMaskWindow"
+        android:layout_width="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/tvD"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="mask window"
+        android:textAllCaps="false"
+        android:textSize="20sp"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnNormal"
+        android:layout_width="wrap_content"
+        android:text="Normal Button"
+        android:textAllCaps="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="20sp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_height="wrap_content"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateInterpolator
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -52,6 +53,20 @@ class MainActivity : AppCompatActivity() {
             Intent(this@MainActivity,SideWindowActivity::class.java).let {
                 startActivity(it)
             }
+        }
+
+
+        findViewById<Button>(R.id.btnMaskWindow).setOnClickListener {
+            val view = LayoutInflater.from(this).inflate(R.layout.mask_window_view,null)
+            val windowInfo = FloatWindow.WindowInfo(view).apply {
+                width = DimensionUtil.getScreenWidth(this@MainActivity)
+                height = DimensionUtil.getScreenHeight(this@MainActivity)
+            }
+            FloatWindow.show(applicationContext,"mask",windowInfo,0,100,false,true,true)
+        }
+
+        findViewById<Button>(R.id.btnNormal).setOnClickListener {
+            Toast.makeText(this@MainActivity,"dkksjfdk",Toast.LENGTH_LONG).show()
         }
 
     }
