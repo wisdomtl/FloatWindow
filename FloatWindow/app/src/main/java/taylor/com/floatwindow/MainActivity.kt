@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
 
 
         findViewById<Button>(R.id.btnMaskWindow).setOnClickListener {
-            val view = LayoutInflater.from(this).inflate(R.layout.mask_window_view,null)
+            val view = LayoutInflater.from(applicationContext).inflate(R.layout.mask_window_view,null)
             val windowInfo = FloatWindow.WindowInfo(view).apply {
                 width = DimensionUtil.getScreenWidth(this@MainActivity)
                 height = DimensionUtil.getScreenHeight(this@MainActivity)
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnNormal).setOnClickListener {
-            Toast.makeText(this@MainActivity,"dkksjfdk",Toast.LENGTH_LONG).show()
+            Toast.makeText(this@MainActivity,"globalMask",Toast.LENGTH_LONG).show()
         }
 
     }
