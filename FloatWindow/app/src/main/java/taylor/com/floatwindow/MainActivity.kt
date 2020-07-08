@@ -16,6 +16,7 @@ import android.view.animation.AccelerateInterpolator
 import android.widget.Button
 import android.widget.Toast
 import taylor.com.BaseActivity
+import taylor.com.HelloDialog
 
 class MainActivity : BaseActivity() {
 
@@ -75,6 +76,10 @@ class MainActivity : BaseActivity() {
         findViewById<Button>(R.id.btnDarkMode).setOnClickListener {
             darkModeEnable = !darkModeEnable
             toggleDarkMode(darkModeEnable)
+        }
+
+        findViewById<Button>(R.id.btnShowDialog).setOnClickListener {
+            HelloDialog.show(supportFragmentManager){}
         }
 
     }
