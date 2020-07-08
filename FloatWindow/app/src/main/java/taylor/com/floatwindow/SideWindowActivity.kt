@@ -10,9 +10,9 @@ import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
 import android.widget.LinearLayout
-import androidx.appcompat.app.AppCompatActivity
+import taylor.com.BaseActivity
 
-class SideWindowActivity : AppCompatActivity() {
+class SideWindowActivity : BaseActivity() {
 
     private var intimacyWindowInfo: FloatWindow.WindowInfo? = null
     private var intimacyTranslationX: Int? = null

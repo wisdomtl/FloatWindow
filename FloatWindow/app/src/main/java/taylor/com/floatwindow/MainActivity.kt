@@ -15,9 +15,9 @@ import android.view.*
 import android.view.animation.AccelerateInterpolator
 import android.widget.Button
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import taylor.com.BaseActivity
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private var progressRing: ProgressRing? = null
     private val FULL_TIME_MILLISECOND = 6 * 1000.toFloat()
@@ -29,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     val BOMB_ANIM_DURATION_IN_MILLISECOND = 6 * 100
     private var animationDrawable: AnimationDrawable? = null
     private var windowInfo: FloatWindow.WindowInfo? = null
+
+    private var darkModeEnable = false
 
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
@@ -67,6 +69,12 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnNormal).setOnClickListener {
             Toast.makeText(this@MainActivity,"globalMask",Toast.LENGTH_LONG).show()
+        }
+
+
+        findViewById<Button>(R.id.btnDarkMode).setOnClickListener {
+            darkModeEnable = !darkModeEnable
+            toggleDarkMode(darkModeEnable)
         }
 
     }

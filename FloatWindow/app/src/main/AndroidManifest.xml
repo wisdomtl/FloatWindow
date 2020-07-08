@@ -23,6 +23,7 @@
         </activity>
         <activity android:name=".SideWindowActivity" />
         <activity android:name=".GravityActivity" />
+        <activity android:name="taylor.com.BaseActivity" />
     </application>
 
 </manifest>

@@ -7,8 +7,8 @@ import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
+import taylor.com.BaseActivity
 import taylor.com.animation_dsl.animSet
 import taylor.com.floatwindow.FloatWindow.FLAG_BOTTOM
 import taylor.com.floatwindow.FloatWindow.FLAG_LEFT
@@ -16,7 +16,7 @@ import taylor.com.floatwindow.FloatWindow.FLAG_MID
 import taylor.com.floatwindow.FloatWindow.FLAG_RIGHT
 import taylor.com.floatwindow.FloatWindow.FLAG_TOP
 
-class GravityActivity : AppCompatActivity() {
+class GravityActivity : BaseActivity() {
 
     private var handler = Handler(Looper.getMainLooper())
 
