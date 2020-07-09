@@ -38,3 +38,4 @@ class Preference(private val sp: SharedPreferences) : SharedPreferences by sp {
         } as T
     }
 }
+

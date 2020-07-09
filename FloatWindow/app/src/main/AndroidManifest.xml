@@ -21,7 +21,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SideWindowActivity" />
+        <activity
+            android:name=".SideWindowActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".GravityActivity" />
         <activity android:name="taylor.com.BaseActivity" />
     </application>

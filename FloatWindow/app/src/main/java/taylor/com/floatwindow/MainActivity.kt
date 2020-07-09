@@ -17,6 +17,8 @@ import android.widget.Button
 import android.widget.Toast
 import taylor.com.BaseActivity
 import taylor.com.HelloDialog
+import taylor.com.Preference
+import taylor.com.nightMode
 
 class MainActivity : BaseActivity() {
 
@@ -33,6 +35,7 @@ class MainActivity : BaseActivity() {
 
     private var darkModeEnable = false
 
+    private val preference by lazy { Preference(getSharedPreferences("dark-mode", Context.MODE_PRIVATE)) }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         printCallStack()
@@ -75,7 +78,8 @@ class MainActivity : BaseActivity() {
 
         findViewById<Button>(R.id.btnDarkMode).setOnClickListener {
             darkModeEnable = !darkModeEnable
-            toggleDarkMode(darkModeEnable)
+            preference["dark-mode"] = darkModeEnable
+            nightMode(darkModeEnable)
         }
 
         findViewById<Button>(R.id.btnShowDialog).setOnClickListener {
