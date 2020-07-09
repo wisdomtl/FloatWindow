@@ -33,10 +33,9 @@ class MainActivity : BaseActivity() {
     private var animationDrawable: AnimationDrawable? = null
     private var windowInfo: FloatWindow.WindowInfo? = null
 
-    private var darkModeEnable = false
-
     private val preference by lazy { Preference(getSharedPreferences("dark-mode", Context.MODE_PRIVATE)) }
 
+    private var darkModeEnable  = false
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         printCallStack()
         return super.dispatchTouchEvent(ev)
@@ -54,6 +53,8 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        darkModeEnable = preference["dark-mode",false]
 
         findViewById<Button>(R.id.tvD).setOnClickListener { _->
             Intent(this@MainActivity,SideWindowActivity::class.java).let {

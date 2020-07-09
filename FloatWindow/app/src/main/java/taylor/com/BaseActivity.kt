@@ -7,6 +7,7 @@ import android.os.Looper
 import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -39,7 +40,7 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     override fun onStart() {
-        nightMode(preference["dark-mode",false])
+        nightMode(preference["dark-mode", false])
         super.onStart()
     }
 }
@@ -53,7 +54,7 @@ val Activity.decorView: FrameLayout?
 fun AppCompatActivity.nightMode(lightOff: Boolean, color: String = "#c8000000") {
     val handler = Handler(Looper.getMainLooper())
     val id = "darkMask"
-    lifecycle.addObserver(object : LifecycleObserver {
+    val observer = object : LifecycleObserver {
         @OnLifecycleEvent(Lifecycle.Event.ON_START)
         fun toggleNightMode() {
             if (lightOff) {
@@ -77,5 +78,39 @@ fun AppCompatActivity.nightMode(lightOff: Boolean, color: String = "#c8000000") 
                 }
             }
         }
-    })
+    }
+    lifecycle.addObserver(observer)
 }
+
+
+fun DialogFragment.nightMode(lightOff: Boolean, color: String = "#c8000000") {
+    val handler = Handler(Looper.getMainLooper())
+    val id = "darkMask"
+    val observer = object : LifecycleObserver {
+        @OnLifecycleEvent(Lifecycle.Event.ON_START)
+        fun toggleNightMode() {
+            if (lightOff) {
+                handler.postAtFrontOfQueue {
+                    val maskView = View {
+                        layout_id = id
+                        layout_width = match_parent
+                        layout_height = match_parent
+                        background_color = color
+                    }
+                    decorView?.apply {
+                        val view = findViewById<View>(id.toLayoutId())
+                        if (view == null) {
+                            addView(maskView)
+                        }
+                    }
+                }
+            } else {
+                decorView?.apply {
+                    find<View>(id)?.let { removeView(it) }
+                }
+            }
+        }
+    }
+    lifecycle.addObserver(observer)
+}
+
