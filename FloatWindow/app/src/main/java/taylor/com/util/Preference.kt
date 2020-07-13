@@ -1,7 +1,6 @@
-package taylor.com
+package taylor.com.util
 
 import android.content.SharedPreferences
-import android.util.Log
 
 /**
  * SharedPreference delegation for shorter code when putting and getting value

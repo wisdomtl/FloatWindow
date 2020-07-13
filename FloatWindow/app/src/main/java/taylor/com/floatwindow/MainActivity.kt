@@ -17,8 +17,8 @@ import android.widget.Button
 import android.widget.Toast
 import taylor.com.BaseActivity
 import taylor.com.HelloDialog
-import taylor.com.Preference
-import taylor.com.nightMode
+import taylor.com.util.Preference
+import taylor.com.util.nightMode
 
 class MainActivity : BaseActivity() {
 

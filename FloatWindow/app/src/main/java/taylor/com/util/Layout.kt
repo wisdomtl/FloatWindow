@@ -1,4 +1,4 @@
-package taylor.com
+package taylor.com.util
 
 import android.content.Context
 import android.content.res.Resources
