@@ -436,6 +436,6 @@ class MainActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        FloatWindow.dismiss(maskWindowInfo)
+        FloatWindow.dismiss("mask")
     }
 }
