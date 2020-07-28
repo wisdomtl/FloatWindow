@@ -380,13 +380,17 @@ object FloatWindow : View.OnTouchListener {
         }
     }
 
-    fun dismiss(windowInfo: WindowInfo? = this.windowInfo) {
+    private fun dismiss(windowInfo: WindowInfo? = this.windowInfo) {
         val windowManager = context?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
         //in case of "IllegalStateException :not attached to window manager."
         if (windowManager != null && windowInfo?.hasParent().value()) {
             windowManager.removeViewImmediate(windowInfo?.view)
             onWindowDismiss?.invoke()
         }
+    }
+
+    fun dismiss(tag:String){
+        windowInfoMap[tag]?.let { dismiss(it) }
     }
 
     fun setWhiteList(whiteList: List<Class<Any>>) {

@@ -35,6 +35,8 @@ class MainActivity : BaseActivity() {
 
     private val preference by lazy { Preference(getSharedPreferences("dark-mode", Context.MODE_PRIVATE)) }
 
+    private var maskWindowInfo:FloatWindow.WindowInfo? = null
+
     private var darkModeEnable  = false
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         printCallStack()
@@ -65,11 +67,11 @@ class MainActivity : BaseActivity() {
 
         findViewById<Button>(R.id.btnMaskWindow).setOnClickListener {
             val view = LayoutInflater.from(applicationContext).inflate(R.layout.mask_window_view,null)
-            val windowInfo = FloatWindow.WindowInfo(view).apply {
+            maskWindowInfo = FloatWindow.WindowInfo(view).apply {
                 width = DimensionUtil.getScreenWidth(this@MainActivity)
                 height = DimensionUtil.getScreenHeight(this@MainActivity)
             }
-            FloatWindow.show(applicationContext,"mask",windowInfo,0,100,false,true,true)
+            FloatWindow.show(applicationContext,"mask",maskWindowInfo,0,100,false,true,true)
         }
 
         findViewById<Button>(R.id.btnNormal).setOnClickListener {
@@ -430,5 +432,10 @@ class MainActivity : BaseActivity() {
         }
         ring.setText("+8")
         set.start()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        FloatWindow.dismiss(maskWindowInfo)
     }
 }
